@@ -198,6 +198,7 @@ begin
   try
     list.Text := FDTable2.FieldByName('rawdata').AsString;
     i := 0;
+    j := 1;
     while i < list.count do
     begin
       if Length(list[i]) = 0 then
@@ -209,7 +210,8 @@ begin
         s := list[i] + list[i + 1]
       else
         s := list[i];
-      j := 1;
+      if j > Length(s) then
+        j := 1;
       while j <= Length(list[i]) do
         if (SameText(s[j], word[1]) = true) and
           (SameText(Copy(s, j, Length(word)), word) = true) then
@@ -222,6 +224,7 @@ begin
             t := Format('<span style=background-color:yellow>%s</span>', [p]);
             list[i] := Copy(s, 1, j - 1) + t + Copy(s, j + Length(word),
               Length(s));
+            s := list[i];
             inc(j, Length(t));
             continue;
           end
@@ -236,9 +239,8 @@ begin
             p := Copy(s, 1, Length(word) - Length(p));
             t := Format('<span style=background-color:yellow>%s</span>', [p]);
             list[i + 1] := t + Copy(s, Length(p) + 1, Length(s));
-            inc(i);
             inc(j, Length(p));
-            continue;
+            break;
           end;
         end
         else
