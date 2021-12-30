@@ -22,6 +22,11 @@ object WebModule1: TWebModule1
       Name = 'WebActionItem4'
       PathInfo = '/admin'
       OnAction = WebModule1WebActionItem4Action
+    end
+    item
+      Name = 'WebActionItem5'
+      PathInfo = '/search'
+      OnAction = WebModule1WebActionItem5Action
     end>
   Height = 321
   Width = 415
@@ -227,7 +232,6 @@ object WebModule1: TWebModule1
       ''
       '<p>'
       '<p>'#12288'<em style="background-color:aqua">'#12288#12288#12288#12288'</em>'#12539#12539#12539'new!'
-      '        <#information>'
       ''
       '<p>[ <a href=/master>master</a> ] <='#31649#29702#20154
       
@@ -345,5 +349,11 @@ object WebModule1: TWebModule1
     OnHTMLTag = DataSetPageProducer3HTMLTag
     Left = 48
     Top = 256
+  end
+  object PageProducer3: TPageProducer
+    HTMLFile = 'templates/search.htm'
+    OnHTMLTag = PageProducer3HTMLTag
+    Left = 248
+    Top = 104
   end
 end

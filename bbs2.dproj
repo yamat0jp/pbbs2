@@ -173,7 +173,6 @@
         </RcItem>
         <None Include="templates\main.htm"/>
         <None Include="templates\setting.ini"/>
-        <None Include="templates\top.htm"/>
         <None Include="templates\alert.htm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
@@ -197,7 +196,7 @@
                 </Source>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="js\main.js" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="templates\login.htm" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -329,12 +328,6 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="templates\top.htm" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="css\livepreview-demo.css" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
@@ -401,7 +394,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="templates\login.htm" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="js\main.js" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

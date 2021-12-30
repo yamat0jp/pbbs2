@@ -37,6 +37,7 @@ type
     FDTable2NAME: TWideStringField;
     FDTable2RAWDATA: TWideMemoField;
     DataSetPageProducer3: TDataSetPageProducer;
+    PageProducer3: TPageProducer;
     procedure WebModule1WebActionItem1Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
@@ -60,14 +61,18 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer3HTMLTag(Sender: TObject; Tag: TTag;
       const TagString: string; TagParams: TStrings; var ReplaceText: string);
+    procedure PageProducer3HTMLTag(Sender: TObject; Tag: TTag;
+      const TagString: string; TagParams: TStrings; var ReplaceText: string);
+    procedure WebModule1WebActionItem5Action(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
   private
     { private éŒ¾ }
     count: Integer;
     pagecount: Integer;
     procedure makeComment(list: TStringList);
     function makeFooter(script: string): string;
-    function makeInfoName: string;
     function ActiveRecordisNew: Boolean;
+    function FindText(word: string): string;
   public
     { public éŒ¾ }
   end;
@@ -150,7 +155,7 @@ begin
       ReplaceText := '‚²‹¦—Í‚ ‚è‚ª‚Æ‚¤‚²‚´‚¢‚Ü‚µ‚½';
   end
   else if TagString = 'query' then
-    ReplaceText := Request.Query;
+    ReplaceText := string(Request.Query);
 end;
 
 procedure TWebModule1.DataSetTableProducer1FormatCell(Sender: TObject;
@@ -177,6 +182,61 @@ begin
     end;
   if (CellRow > 1) and (CellRow and 1 = 0) then
     BgColor := 'Silver';
+end;
+
+function TWebModule1.FindText(word: string): string;
+var
+  list: TStringList;
+  i, j: Integer;
+  s, t: string;
+  x: Boolean;
+begin
+  if Length(word) = 0 then
+    Exit;
+  x := false;
+  t := '<span style=bgcolor:green>' + word + '</span>';
+  list := TStringList.Create;
+  try
+    list.Text := FDTable2.FieldByName('rawdata').AsString;
+    i := 0;
+    while i < list.count do
+    begin
+      if i < list.count - 1 then
+        s := list[i] + list[i + 1]
+      else
+        s := list[i];
+      if Length(list[i]) = 0 then
+      begin
+        inc(i);
+        continue;
+      end;
+      j := 1;
+      while j < Length(list[i]) do
+      begin
+        if (s[j] = word[1]) and (SameText(Copy(s, j, Length(word)), word) = true)
+        then
+        begin
+          if j + Length(word) <= Length(list[i]) then
+          begin
+            s := list[i];
+            list[i] := Copy(s, 1, j - 1) + t + Copy(s, j + Length(word),
+              Length(s));
+            inc(j, Length(t));
+            x := true;
+          end;
+        end;
+        inc(j);
+      end;
+      inc(i);
+    end;
+    makeComment(list);
+    if x = true then
+      result := list.Text
+    else
+      result := '';
+  finally
+    list.Free;
+  end;
 end;
 
 procedure TWebModule1.makeComment(list: TStringList);
@@ -224,18 +284,6 @@ begin
     result := list.Text;
   finally
     list.Free;
-  end;
-end;
-
-function TWebModule1.makeInfoName: string;
-var
-  ini: TIniFile;
-begin
-  ini := TIniFile.Create('templates/setting.ini');
-  try
-    result := ini.ReadString('data', 'name', 'info');
-  finally
-    ini.Free;
   end;
 end;
 
@@ -306,11 +354,6 @@ begin
     finally
       list.Free;
     end;
-  end
-  else if TagString = 'information' then
-  begin
-    t := makeInfoName;
-    ReplaceText := Format('<p>[ <a href=/bbs?db=%s>%s</a> ] <=‚¨’m‚ç‚¹', [t, t]);
   end;
 end;
 
@@ -326,6 +369,42 @@ begin
   else if (TagString = 'section') and
     (FDTable2.Locate('cmnumber', PageProducer2.Tag) = true) then
     ReplaceText := DataSetPageProducer2.Content;
+end;
+
+procedure TWebModule1.PageProducer3HTMLTag(Sender: TObject; Tag: TTag;
+  const TagString: string; TagParams: TStrings; var ReplaceText: string);
+var
+  list: TStringList;
+  s, t: string;
+begin
+  if (TagString = 'main') and (Request.MethodType = mtPost) then
+  begin
+    s := Request.ContentFields.Values['word1'];
+    list := TStringList.Create;
+    try
+      FDTable1.First;
+      while FDTable1.Eof = false do
+      begin
+        while FDTable2.Eof = false do
+        begin
+          t := FindText(s);
+          if t <> '' then
+          begin
+            list.Add(t);
+            list.Add('<hr>');
+          end;
+          FDTable2.Next;
+        end;
+        FDTable1.Next;
+      end;
+      if list.count > 0 then
+        ReplaceText := list.Text
+      else
+        ReplaceText := 'Œ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½';
+    finally
+      list.Free;
+    end;
+  end;
 end;
 
 procedure TWebModule1.WebModule1WebActionItem1Action(Sender: TObject;
@@ -476,6 +555,13 @@ begin
   PageProducer2.Tag := StrToIntDef(Request.QueryFields.Values['link'], 0);
   Response.ContentType := 'text/html;charset=utf-8;';
   Response.Content := PageProducer2.Content;
+end;
+
+procedure TWebModule1.WebModule1WebActionItem5Action(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+begin
+  Response.ContentType := 'text/html;charset=utf-8';
+  Response.Content := PageProducer3.Content;
 end;
 
 procedure TWebModule1.WebModuleCreate(Sender: TObject);
