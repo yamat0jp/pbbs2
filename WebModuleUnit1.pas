@@ -188,45 +188,61 @@ function TWebModule1.FindText(word: string): string;
 var
   list: TStringList;
   i, j: Integer;
-  s, t: string;
+  s, t, p: string;
   x: Boolean;
 begin
   if Length(word) = 0 then
     Exit;
   x := false;
-  t := '<span style=bgcolor:green>' + word + '</span>';
   list := TStringList.Create;
   try
     list.Text := FDTable2.FieldByName('rawdata').AsString;
     i := 0;
     while i < list.count do
     begin
-      if i < list.count - 1 then
-        s := list[i] + list[i + 1]
-      else
-        s := list[i];
       if Length(list[i]) = 0 then
       begin
         inc(i);
         continue;
       end;
+      if i < list.count - 1 then
+        s := list[i] + list[i + 1]
+      else
+        s := list[i];
       j := 1;
-      while j < Length(list[i]) do
-      begin
-        if (s[j] = word[1]) and (SameText(Copy(s, j, Length(word)), word) = true)
-        then
+      while j <= Length(list[i]) do
+        if (SameText(s[j], word[1]) = true) and
+          (SameText(Copy(s, j, Length(word)), word) = true) then
         begin
-          if j + Length(word) <= Length(list[i]) then
+          if j + Length(word) - 1 <= Length(list[i]) then
           begin
             s := list[i];
+            x := true;
+            p := Copy(s, j, Length(word));
+            t := Format('<span style=background-color:yellow>%s</span>', [p]);
             list[i] := Copy(s, 1, j - 1) + t + Copy(s, j + Length(word),
               Length(s));
             inc(j, Length(t));
+            continue;
+          end
+          else
+          begin
+            s := list[i];
             x := true;
+            p := Copy(s, j, Length(word));
+            t := Format('<span style=background-color:yellow>%s</span>', [p]);
+            list[i] := Copy(s, 1, j - 1) + t;
+            s := list[i + 1];
+            p := Copy(s, 1, Length(word) - Length(p));
+            t := Format('<span style=background-color:yellow>%s</span>', [p]);
+            list[i + 1] := t + Copy(s, Length(p) + 1, Length(s));
+            inc(i);
+            inc(j, Length(p));
+            continue;
           end;
-        end;
-        inc(j);
-      end;
+        end
+        else
+          inc(j);
       inc(i);
     end;
     makeComment(list);
