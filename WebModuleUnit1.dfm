@@ -8,6 +8,11 @@ object WebModule1: TWebModule1
       OnAction = WebModule1WebActionItem1Action
     end
     item
+      Name = 'WebActionItem2'
+      PathInfo = '/alert'
+      OnAction = WebModule1WebActionItem2Action
+    end
+    item
       Default = True
       Name = 'WebActionItem3'
       PathInfo = '/top'
@@ -22,7 +27,7 @@ object WebModule1: TWebModule1
   Width = 415
   object FDConnection1: TFDConnection
     Params.Strings = (
-      'Database=C:\Users\yamat\Documents\GitHub\bbs\templates\DATA.IB'
+      'Database=C:\Users\yamat\Documents\GitHub\pbbs2\templates\DATA.IB'
       'User_Name=sysdba'
       'Password=masterkey'
       'CharacterSet=UTF8'
@@ -256,7 +261,7 @@ object WebModule1: TWebModule1
       '</html>')
     OnHTMLTag = PageProducer1HTMLTag
     Left = 48
-    Top = 216
+    Top = 208
   end
   object DataSetPageProducer2: TDataSetPageProducer
     HTMLFile = 'templates/main.htm'
@@ -269,12 +274,15 @@ object WebModule1: TWebModule1
     Columns = <
       item
         BgColor = 'White'
-        FieldName = 'check'
+        Title.Custom = 'width=5%'
         Title.BgColor = 'Aqua'
+        Title.Caption = 'CHECK'
       end
       item
         FieldName = 'CMNUMBER'
+        Title.Custom = 'width=5%'
         Title.BgColor = 'Aqua'
+        Title.Caption = 'NUMBER'
       end
       item
         FieldName = 'TITLE'
@@ -282,6 +290,12 @@ object WebModule1: TWebModule1
       end
       item
         FieldName = 'NAME'
+        Title.BgColor = 'Aqua'
+      end
+      item
+        BgColor = 'White'
+        FieldName = 'LINK'
+        Title.Custom = 'width=5%'
         Title.BgColor = 'Aqua'
       end>
     DataSet = FDTable2
@@ -292,6 +306,17 @@ object WebModule1: TWebModule1
   end
   object PageProducer2: TPageProducer
     HTMLDoc.Strings = (
+      '<html>'
+      '<head>'
+      '<meta charset="utf-8">'
+      '</head>'
+      '<body>'
+      '  <link rel=stylesheet href=css/main.css>'
+      
+        '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/' +
+        'bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFG' +
+        'wb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" cross' +
+        'origin="anonymous">'
       '<form class=setting action=/admin?db=<#dbname> method=post>'
       '<input type=hidden name=change value=true>'
       
@@ -305,9 +330,19 @@ object WebModule1: TWebModule1
       '<#table>'
       '<input type=submit value="'#21066#38500'"><input type=reset value="'#21462#12426#28040#12375'">'
       '</form>'
-      '<a href=/bbs?db=<#dbname>>'#12418#12393#12427'</a>')
+      '<#footer>'
+      '<a href=/bbs?db=<#dbname>>'#12418#12393#12427'</a>'
+      '</body>'
+      '</html>')
     OnHTMLTag = PageProducer2HTMLTag
     Left = 328
     Top = 264
+  end
+  object DataSetPageProducer3: TDataSetPageProducer
+    HTMLFile = 'templates/alert.htm'
+    DataSet = FDTable1
+    OnHTMLTag = DataSetPageProducer3HTMLTag
+    Left = 48
+    Top = 256
   end
 end

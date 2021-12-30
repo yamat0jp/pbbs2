@@ -36,6 +36,7 @@ type
     FDTable2TITLE: TWideStringField;
     FDTable2NAME: TWideStringField;
     FDTable2RAWDATA: TWideMemoField;
+    DataSetPageProducer3: TDataSetPageProducer;
     procedure WebModule1WebActionItem1Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
@@ -55,12 +56,16 @@ type
     procedure WebModuleCreate(Sender: TObject);
     procedure PageProducer2HTMLTag(Sender: TObject; Tag: TTag;
       const TagString: string; TagParams: TStrings; var ReplaceText: string);
+    procedure WebModule1WebActionItem2Action(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure DataSetPageProducer3HTMLTag(Sender: TObject; Tag: TTag;
+      const TagString: string; TagParams: TStrings; var ReplaceText: string);
   private
     { private êÈåæ }
     count: Integer;
     pagecount: Integer;
     procedure makeComment(list: TStringList);
-    function makeFooter: string;
+    function makeFooter(script: string): string;
     function makeInfoName: string;
     function ActiveRecordisNew: Boolean;
   public
@@ -89,8 +94,6 @@ procedure TWebModule1.DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
   const TagString: string; TagParams: TStrings; var ReplaceText: string);
 var
   i, cnt: Integer;
-  stream: TStream;
-  list: TStringList;
 begin
   if TagString = 'main' then
   begin
@@ -114,29 +117,33 @@ begin
     end;
   end
   else if TagString = 'footer' then
-    ReplaceText := makeFooter;
+    ReplaceText := makeFooter('bbs');;
 end;
 
 procedure TWebModule1.DataSetPageProducer2HTMLTag(Sender: TObject; Tag: TTag;
   const TagString: string; TagParams: TStrings; var ReplaceText: string);
-var
-  list: TStringList;
-  stream: TStream;
 begin
   if TagString = 'dbname' then
     ReplaceText := FDTable1.FieldByName('dbname').AsString
   else if TagString = 'comment' then
+    ReplaceText := FDTable2.FieldByName('comment').AsString;
+end;
+
+procedure TWebModule1.DataSetPageProducer3HTMLTag(Sender: TObject; Tag: TTag;
+  const TagString: string; TagParams: TStrings; var ReplaceText: string);
+begin
+  if TagString = 'article' then
   begin
-    list := TStringList.Create;
-    stream := FDTable2.CreateBlobStream
-      (FDTable2.FieldByName('comment'), bmRead);
-    try
-      list.LoadFromStream(stream);
-      ReplaceText := list.Text;
-    finally
-      list.Free;
-      stream.Free;
-    end;
+    if DataSetPageProducer3.Tag = 0 then
+      ReplaceText := DataSetPageProducer2.Content;
+  end
+  else if TagString = 'message' then
+  begin
+    if DataSetPageProducer3.Tag = 0 then
+      ReplaceText :=
+        '<textarea name=com></textarea><p style=text-align:center><input name=admit type=submit value="ëóêM">'
+    else
+      ReplaceText := 'Ç≤ã¶óÕÇ†ÇËÇ™Ç∆Ç§Ç≤Ç¥Ç¢Ç‹ÇµÇΩ';
   end;
 end;
 
@@ -148,6 +155,8 @@ begin
   if (CellRow > 0) and (CellColumn = 0) then
     CellData := Format('<input type=checkbox name=check value=%d>',
       [FDTable2.FieldByName('cmnumber').AsInteger]);
+  if (CellRow > 1)and(CellRow and 1 = 0) then
+    BgColor := 'Silver';
 end;
 
 procedure TWebModule1.makeComment(list: TStringList);
@@ -158,12 +167,16 @@ begin
     list[i] := list[i] + '<br>';
 end;
 
-function TWebModule1.makeFooter: string;
+function TWebModule1.makeFooter(script: string): string;
 var
   list: TStringList;
   i, j: Integer;
-  s, t: string;
+  s, t, p: string;
 begin
+  if script = 'bbs' then
+    p:='Ç≥Ç¢Ç≤'
+  else
+    p:='ÇÕÇ∂Çﬂ';
   if Request.QueryFields.Values['page'] = '' then
   begin
     t := 'active';
@@ -182,12 +195,12 @@ begin
       else
         list.Add('<li class="page-item">');
       list.Add(Format
-        ('<a class="page-link" href="/bbs?db=%s&page=%d">%d</a></li>',
-        [s, i, i]));
+        ('<a class="page-link" href="/%s?db=%s&page=%d">%d</a></li>',
+        [script, s, i, i]));
     end;
     list.Add(Format
-      ('<li class="page-item %s"><a class="page-link" href=/bbs?db=%s>Ç≥Ç¢Ç≤</a></li></ul></nav>',
-      [t, s]));
+      ('<li class="page-item %s"><a class="page-link" href=/%s?db=%s>%s</a></li></ul></nav>',
+      [t, script, s, p]));
     result := list.Text;
   finally
     list.Free;
@@ -198,7 +211,7 @@ function TWebModule1.makeInfoName: string;
 var
   ini: TIniFile;
 begin
-  ini := TIniFile.Create('templates\setting.ini');
+  ini := TIniFile.Create('templates/setting.ini');
   try
     result := ini.ReadString('data', 'name', 'info');
   finally
@@ -287,7 +300,9 @@ begin
   if TagString = 'table' then
     ReplaceText := DataSetTableProducer1.Content
   else if TagString = 'dbname' then
-    ReplaceText := Request.QueryFields.Values['db'];
+    ReplaceText := Request.QueryFields.Values['db']
+  else if TagString = 'footer' then
+    ReplaceText := makeFooter('admin');
 end;
 
 procedure TWebModule1.WebModule1WebActionItem1Action(Sender: TObject;
@@ -320,14 +335,61 @@ begin
     try
       list.Text := raw;
       makeComment(list);
-      FDTable2.AppendRecord([FDTable1.FieldByName('dbnumber').AsInteger, i, title,
-        name, list.Text, Now, raw]);
+      FDTable2.AppendRecord([FDTable1.FieldByName('dbnumber').AsInteger, i,
+        title, name, list.Text, Now, raw]);
     finally
       list.Free;
     end;
   end;
   Response.ContentType := 'text/html;charset=utf-8';
   Response.Content := DataSetPageProducer1.Content;
+end;
+
+procedure TWebModule1.WebModule1WebActionItem2Action(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  stream: TFileStream;
+  list: TStringList;
+  s: string;
+begin
+  if Request.MethodType = mtGet then
+  begin
+    if (FDTable1.Locate('dbname', Request.QueryFields.Values['db']) = false) or
+      (FDTable2.Locate('cmnumber', Request.QueryFields.Values['page']) = false)
+    then
+    begin
+      Handled := false;
+      Exit;
+    end;
+    DataSetPageProducer3.Tag := 0;
+  end
+  else if Request.MethodType = mtPost then
+  begin
+    s := Request.ContentFields.Values['db'];
+    if FDTable1.Locate('dbname', s) = false then
+    begin
+      Handled := false;
+      Exit;
+    end;
+    DataSetPageProducer3.Tag := 1;
+    if FileExists('templates/voice.txt') = true then
+      stream := TFileStream.Create('templates/voice.txt', fmOpenReadWrite)
+    else
+      stream := TFileStream.Create('templates/voice.txt', fmCreate);
+    stream.Position := stream.Size;
+    list := TStringList.Create;
+    try
+      list.Add(s);
+      list.Add(DataSetPageProducer2.Content);
+      list.Add(Request.ContentFields.Values['com']);
+      list.SaveToStream(stream);
+    finally
+      stream.Free;
+      list.Free;
+    end;
+  end;
+  Response.ContentType := 'text/html;charset=utf-8';
+  Response.Content := DataSetPageProducer3.Content;
 end;
 
 procedure TWebModule1.WebModule1WebActionItem3Action(Sender: TObject;
@@ -358,6 +420,7 @@ begin
     Exit;
   end;
   if Request.MethodType = mtPost then
+  begin
     if Request.ContentFields.Values['change'] = 'true' then
     begin
       FDTable1.Edit;
@@ -384,6 +447,10 @@ begin
         FDTable2.Delete;
       FDTable2.Filtered := false;
     end;
+  end;
+  i := StrToIntDef(Request.QueryFields.Values['page'], 0);
+  FDTable2.First;
+  FDTable2.MoveBy((i - 1) * 2 * count);
   Response.ContentType := 'text/html;charset=utf-8;';
   Response.Content := PageProducer2.Content;
 end;
@@ -392,13 +459,14 @@ procedure TWebModule1.WebModuleCreate(Sender: TObject);
 var
   ini: TIniFile;
 begin
-  ini := TIniFile.Create('templates\setting.ini');
+  ini := TIniFile.Create('templates/setting.ini');
   try
     count := ini.ReadInteger('data', 'count', 10);
     pagecount := ini.ReadInteger('data', 'pagecount', 10);
   finally
     ini.Free;
   end;
+  DataSetTableProducer1.MaxRows := 2 * count;
 end;
 
 end.

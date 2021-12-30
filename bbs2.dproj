@@ -174,6 +174,7 @@
         <None Include="templates\main.htm"/>
         <None Include="templates\setting.ini"/>
         <None Include="templates\top.htm"/>
+        <None Include="templates\alert.htm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -196,7 +197,7 @@
                 </Source>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="templates\login.htm" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="js\main.js" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -232,6 +233,12 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="templates\alert.htm" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="img\slide2.jpg" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
@@ -256,13 +263,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="img\slide12.jpg" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="img\slide7.jpg" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="img\slide7.jpg" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="img\slide12.jpg" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -394,7 +401,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="js\main.js" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="templates\login.htm" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

@@ -1,0 +1,15 @@
+﻿<!doctype html>
+<html>
+<head><meta charset=utf-8><title>報告申請画面</title>
+<link rel=stylesheet href=css/main.css></head>
+
+<body>
+<#article>
+<form action=/alert method=post>
+<p>宜しければ何かお書き添えください
+<p><#message>
+<input type="HIDDEN" name=db value=<#dbname>>
+<input type=hidden name=num value=<#cmnumber>>
+</form>
+<a href=/bbs?db=<#dbname>>もどる</a>
+</body></html>
