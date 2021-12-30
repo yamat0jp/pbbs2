@@ -294,9 +294,9 @@ object WebModule1: TWebModule1
       end
       item
         BgColor = 'White'
-        FieldName = 'LINK'
         Title.Custom = 'width=5%'
         Title.BgColor = 'Aqua'
+        Title.Caption = 'LINK'
       end>
     DataSet = FDTable2
     TableAttributes.BgColor = 'White'
@@ -331,6 +331,7 @@ object WebModule1: TWebModule1
       '<input type=submit value="'#21066#38500'"><input type=reset value="'#21462#12426#28040#12375'">'
       '</form>'
       '<#footer>'
+      '<#section>'
       '<a href=/bbs?db=<#dbname>>'#12418#12393#12427'</a>'
       '</body>'
       '</html>')

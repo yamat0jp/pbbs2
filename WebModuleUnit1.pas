@@ -94,6 +94,7 @@ procedure TWebModule1.DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
   const TagString: string; TagParams: TStrings; var ReplaceText: string);
 var
   i, cnt: Integer;
+  s: string;
 begin
   if TagString = 'main' then
   begin
@@ -109,9 +110,12 @@ begin
       FDTable2.MoveBy((i - 1) * count);
     end;
     cnt := count;
+    s := FDTable1.FieldByName('dbname').AsString;
     while (FDTable2.Eof = false) and (cnt > 0) do
     begin
-      ReplaceText := ReplaceText + DataSetPageProducer2.Content;
+      ReplaceText := ReplaceText + DataSetPageProducer2.Content +
+        Format('<p style=text-align:end><a href=/alert?db=%s&page=%d>ïÒçê</a>',
+        [s, FDTable2.FieldByName('cmnumber').AsInteger]);
       FDTable2.Next;
       dec(cnt);
     end;
@@ -151,11 +155,25 @@ procedure TWebModule1.DataSetTableProducer1FormatCell(Sender: TObject;
   CellRow, CellColumn: Integer; var BgColor: THTMLBgColor;
   var Align: THTMLAlign; var VAlign: THTMLVAlign;
   var CustomAttrs, CellData: string);
+var
+  s: string;
 begin
-  if (CellRow > 0) and (CellColumn = 0) then
-    CellData := Format('<input type=checkbox name=check value=%d>',
-      [FDTable2.FieldByName('cmnumber').AsInteger]);
-  if (CellRow > 1)and(CellRow and 1 = 0) then
+  if CellRow > 0 then
+    case CellColumn of
+      0:
+        CellData := Format('<input type=checkbox name=check value=%d>',
+          [FDTable2.FieldByName('cmnumber').AsInteger]);
+      4:
+        begin
+          s := Request.QueryFields.Values['page'];
+          if s <> '' then
+            s := '&page=' + s;
+          CellData := Format('<a href=/admin?db=%s%s&link=%d>go</a>',
+            [Request.QueryFields.Values['db'], s,
+            FDTable2.FieldByName('cmnumber').AsInteger]);
+        end;
+    end;
+  if (CellRow > 1) and (CellRow and 1 = 0) then
     BgColor := 'Silver';
 end;
 
@@ -174,9 +192,9 @@ var
   s, t, p: string;
 begin
   if script = 'bbs' then
-    p:='Ç≥Ç¢Ç≤'
+    p := 'Ç≥Ç¢Ç≤'
   else
-    p:='ÇÕÇ∂Çﬂ';
+    p := 'ÇÕÇ∂Çﬂ';
   if Request.QueryFields.Values['page'] = '' then
   begin
     t := 'active';
@@ -302,7 +320,10 @@ begin
   else if TagString = 'dbname' then
     ReplaceText := Request.QueryFields.Values['db']
   else if TagString = 'footer' then
-    ReplaceText := makeFooter('admin');
+    ReplaceText := makeFooter('admin')
+  else if (TagString = 'section') and
+    (FDTable2.Locate('cmnumber', PageProducer2.Tag) = true) then
+    ReplaceText := DataSetPageProducer2.Content;
 end;
 
 procedure TWebModule1.WebModule1WebActionItem1Action(Sender: TObject;
@@ -451,6 +472,7 @@ begin
   i := StrToIntDef(Request.QueryFields.Values['page'], 0);
   FDTable2.First;
   FDTable2.MoveBy((i - 1) * 2 * count);
+  PageProducer2.Tag := StrToIntDef(Request.QueryFields.Values['link'], 0);
   Response.ContentType := 'text/html;charset=utf-8;';
   Response.Content := PageProducer2.Content;
 end;
