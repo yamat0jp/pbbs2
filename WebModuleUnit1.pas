@@ -148,7 +148,9 @@ begin
         '<textarea name=com></textarea><p style=text-align:center><input name=admit type=submit value="送信">'
     else
       ReplaceText := 'ご協力ありがとうございました';
-  end;
+  end
+  else if TagString = 'query' then
+    ReplaceText := Request.Query;
 end;
 
 procedure TWebModule1.DataSetTableProducer1FormatCell(Sender: TObject;
@@ -371,27 +373,18 @@ procedure TWebModule1.WebModule1WebActionItem2Action(Sender: TObject;
 var
   stream: TFileStream;
   list: TStringList;
-  s: string;
 begin
-  if Request.MethodType = mtGet then
+  if (FDTable1.Locate('dbname', Request.QueryFields.Values['db']) = false) or
+    (FDTable2.Locate('cmnumber', Request.QueryFields.Values['page']) = false)
+  then
   begin
-    if (FDTable1.Locate('dbname', Request.QueryFields.Values['db']) = false) or
-      (FDTable2.Locate('cmnumber', Request.QueryFields.Values['page']) = false)
-    then
-    begin
-      Handled := false;
-      Exit;
-    end;
-    DataSetPageProducer3.Tag := 0;
-  end
+    Handled := false;
+    Exit;
+  end;
+  if Request.MethodType = mtGet then
+    DataSetPageProducer3.Tag := 0
   else if Request.MethodType = mtPost then
   begin
-    s := Request.ContentFields.Values['db'];
-    if FDTable1.Locate('dbname', s) = false then
-    begin
-      Handled := false;
-      Exit;
-    end;
     DataSetPageProducer3.Tag := 1;
     if FileExists('templates/voice.txt') = true then
       stream := TFileStream.Create('templates/voice.txt', fmOpenReadWrite)
@@ -400,9 +393,17 @@ begin
     stream.Position := stream.Size;
     list := TStringList.Create;
     try
-      list.Add(s);
-      list.Add(DataSetPageProducer2.Content);
+      list.Add('');
+      list.Add('(*ユーザー様から報告がありました*)');
+      list.Add(FDTable1.FieldByName('dbname').AsString);
+      list.Add(FDTable2.FieldByName('cmnumber').AsString);
+      list.Add(FDTable2.FieldByName('title').AsString);
+      list.Add(FDTable2.FieldByName('name').AsString);
+      list.Add(FDTable2.FieldByName('datetime').AsString);
+      list.Add(FDTable2.FieldByName('rawdata').AsString);
       list.Add(Request.ContentFields.Values['com']);
+      list.Add('(*報告ここまで*)');
+      list.Add('');
       list.SaveToStream(stream);
     finally
       stream.Free;
