@@ -101,11 +101,9 @@
         <None Include="templates\index.htm"/>
         <None Include="templates\login.htm"/>
         <None Include="templates\search.htm"/>
-        <None Include="js\jquery-live-preview.js"/>
         <None Include="js\main.js"/>
         <None Include="js\sub.js"/>
         <None Include="js\top.js"/>
-        <None Include="css\livepreview-demo.css"/>
         <None Include="css\main.css"/>
         <None Include="css\normalize.css"/>
         <None Include="css\smart.css"/>
@@ -174,6 +172,7 @@
         <None Include="templates\main.htm"/>
         <None Include="templates\setting.ini"/>
         <None Include="templates\alert.htm"/>
+        <None Include="templates\mentenance.htm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -196,7 +195,7 @@
                 </Source>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="templates\login.htm" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="js\main.js" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -215,12 +214,6 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="css\smart.css" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="js\jquery-live-preview.js" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -251,6 +244,12 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="css\normalize.css" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="templates\mentenance.htm" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -328,12 +327,6 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="css\livepreview-demo.css" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="img\BBS_bn.jpg" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
@@ -394,7 +387,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="js\main.js" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="templates\login.htm" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

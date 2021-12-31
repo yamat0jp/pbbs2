@@ -27,7 +27,6 @@ type
     DataSetPageProducer2: TDataSetPageProducer;
     DataSetTableProducer1: TDataSetTableProducer;
     FDTable1DBNUMBER: TIntegerField;
-    FDTable1DBNAME: TWideStringField;
     FDTable2DBNUMBER: TIntegerField;
     FDTable2CMNUMBER: TIntegerField;
     FDTable2COMMENT: TWideMemoField;
@@ -38,6 +37,8 @@ type
     FDTable2RAWDATA: TWideMemoField;
     DataSetPageProducer3: TDataSetPageProducer;
     PageProducer3: TPageProducer;
+    PageProducer4: TPageProducer;
+    FDTable1DBNAME: TWideStringField;
     procedure WebModule1WebActionItem1Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
@@ -65,10 +66,13 @@ type
       const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModule1WebActionItem5Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModuleBeforeDispatch(Sender: TObject; Request: TWebRequest;
+      Response: TWebResponse; var Handled: Boolean);
   private
     { private êÈåæ }
     count: Integer;
     pagecount: Integer;
+    mente: Boolean;
     procedure makeComment(list: TStringList);
     function makeFooter(script: string): string;
     function ActiveRecordisNew: Boolean;
@@ -405,9 +409,19 @@ begin
       begin
         while FDTable2.Eof = false do
         begin
-          t := FindText(s);
+          if Request.ContentFields.Values['filter'] = 'name' then
+          begin
+            if FDTable2.FieldByName('name').AsString = s then
+              t := FDTable2.FieldByName('comment').AsString;
+          end
+          else
+            t := FindText(s);
           if t <> '' then
           begin
+            list.Add(FDTable1.FieldByName('dbname').AsString + '  [ ' +
+              FDTable2.FieldByName('cmnumber').AsString + ' ]<br>');
+            list.Add(FDTable2.FieldByName('name').AsString);
+            list.Add(FDTable2.FieldByName('datetime').AsString+'<br>');
             list.Add(t);
             list.Add('<hr>');
           end;
@@ -582,6 +596,17 @@ begin
   Response.Content := PageProducer3.Content;
 end;
 
+procedure TWebModule1.WebModuleBeforeDispatch(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+begin
+  if mente = true then
+  begin
+    Response.ContentType := 'text/html;charset=utf-8';
+    Response.Content := PageProducer4.Content;
+    Handled := true;
+  end;
+end;
+
 procedure TWebModule1.WebModuleCreate(Sender: TObject);
 var
   ini: TIniFile;
@@ -590,6 +615,7 @@ begin
   try
     count := ini.ReadInteger('data', 'count', 10);
     pagecount := ini.ReadInteger('data', 'pagecount', 10);
+    mente := ini.ReadBool('data', 'mentenance', false);
   finally
     ini.Free;
   end;

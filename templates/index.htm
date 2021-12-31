@@ -14,8 +14,8 @@
     <#title2>
     <p>
     </p>
-    <p></p>
-    <form action="/bbs?db=<#dbname>" method="post">
+    <section style=display:block>
+    <form action="/bbs?db=<#dbname>" method="post" style=
       <div style="HEIGHT: 15px; WIDTH: 70px; POSITION: relative; DISPLAY: inline" ms_positioning="FlowLayout">お名前
 </div><input name="name" value="<#username>">
       <div style="HEIGHT: 15px; WIDTH: 70px; POSITION: relative; DISPLAY: inline" ms_positioning="FlowLayout">タイトル
@@ -25,29 +25,10 @@
     <p></p>
     <p><textarea name="comment" style="HEIGHT: 156px; WIDTH: 633px" rows="1" cols="39"></textarea>&nbsp;
 </p>
-    <p>
-    </p>
-      <div style="HEIGHT: 19px; WIDTH: 97px; POSITION: relative; DISPLAY: inline" ms_positioning="FlowLayout">パスワード
-</div><input
-             name="password" style="HEIGHT: 27px; WIDTH: 75px" size="5" type="password">
     </form>
+    </section>
     <p></p>
       <hr size="1" width="100%">
-      <form action="/user?db=<#dbname>" method="post">
-      <div align="left">
-      <div style="HEIGHT: 22px; WIDTH: 73px; POSITION: relative; DISPLAY: inline" ms_positioning="FlowLayout">
-          <p dir="ltr">記事No.
-</p>
-</div><input style="HEIGHT: 25px; WIDTH: 54px" size="2" name="number">
-          <div style="HEIGHT: 22px; WIDTH: 48px; POSITION: relative; DISPLAY: inline" ms_positioning="FlowLayout">
-            <p>Pass
-</p>
-          </div><input style="HEIGHT: 27px; WIDTH: 69px" size="4" type="password" name="password">&nbsp; <input type="submit" value="削除">
-
-
-</div>
-
-</form>
     <#footer>
     <#main>
     <a id=bottom></a>

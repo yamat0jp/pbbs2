@@ -28,6 +28,7 @@ object WebModule1: TWebModule1
       PathInfo = '/search'
       OnAction = WebModule1WebActionItem5Action
     end>
+  BeforeDispatch = WebModuleBeforeDispatch
   Height = 321
   Width = 415
   object FDConnection1: TFDConnection
@@ -60,7 +61,7 @@ object WebModule1: TWebModule1
       FieldName = 'DBNAME'
       Origin = 'DBNAME'
       Required = True
-      Size = 4
+      Size = 128
     end
   end
   object FDTable2: TFDTable
@@ -240,7 +241,7 @@ object WebModule1: TWebModule1
         'ow-faces="true" data-share="false"></div><footer>'
       '<p align="center">'#12522#12531#12463#12501#12522#12540
       #9'<p align="center"><img src="img/BBS_bn.jpg">'
-      '<p><a href=/search>'#20840#20307#26908#32034'</a>'
+      '<p><a href=/search target=_blank>'#20840#20307#26908#32034'</a>'
       '<p><a href=/title>'#12479#12452#12488#12523#34920#31034'</a>'
       '<p><a href=/help>'#20351#12356#26041#26696#20869'</a>'
       '<p>PR '#12522#12531#12463
@@ -355,5 +356,10 @@ object WebModule1: TWebModule1
     OnHTMLTag = PageProducer3HTMLTag
     Left = 248
     Top = 104
+  end
+  object PageProducer4: TPageProducer
+    HTMLFile = 'templates/mentenance.htm'
+    Left = 248
+    Top = 160
   end
 end
