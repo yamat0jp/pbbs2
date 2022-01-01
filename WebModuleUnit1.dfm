@@ -27,6 +27,11 @@ object WebModule1: TWebModule1
       Name = 'WebActionItem5'
       PathInfo = '/search'
       OnAction = WebModule1WebActionItem5Action
+    end
+    item
+      Name = 'WebActionItem6'
+      PathInfo = '/help'
+      OnAction = WebModule1WebActionItem6Action
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 321
@@ -234,7 +239,6 @@ object WebModule1: TWebModule1
       '<p>'
       '<p>'#12288'<em style="background-color:aqua">'#12288#12288#12288#12288'</em>'#12539#12539#12539'new!'
       ''
-      '<p>[ <a href=/master>master</a> ] <='#31649#29702#20154
       
         '<div class="fb-like" data-href="http://pybbs.herokuapp.com" data' +
         '-layout="box_count" data-action="like" data-size="small" data-sh' +
@@ -242,7 +246,6 @@ object WebModule1: TWebModule1
       '<p align="center">'#12522#12531#12463#12501#12522#12540
       #9'<p align="center"><img src="img/BBS_bn.jpg">'
       '<p><a href=/search target=_blank>'#20840#20307#26908#32034'</a>'
-      '<p><a href=/title>'#12479#12452#12488#12523#34920#31034'</a>'
       '<p><a href=/help>'#20351#12356#26041#26696#20869'</a>'
       '<p>PR '#12522#12531#12463
       '<br>'
@@ -361,5 +364,10 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates/mentenance.htm'
     Left = 248
     Top = 160
+  end
+  object PageProducer5: TPageProducer
+    HTMLFile = 'C:\Users\yamat\Documents\GitHub\pbbs2\templates\help.htm'
+    Left = 248
+    Top = 264
   end
 end

@@ -39,6 +39,7 @@ type
     PageProducer3: TPageProducer;
     PageProducer4: TPageProducer;
     FDTable1DBNAME: TWideStringField;
+    PageProducer5: TPageProducer;
     procedure WebModule1WebActionItem1Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
@@ -68,6 +69,8 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModuleBeforeDispatch(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1WebActionItem6Action(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
   private
     { private 宣言 }
     count: Integer;
@@ -217,7 +220,7 @@ begin
       end;
       s := '';
       cnt := 0;
-      while Length(s)-j+1 <= Length(word) do
+      while Length(s) - j + 1 <= Length(word) do
       begin
         s := s + list[i + cnt];
         inc(cnt);
@@ -247,11 +250,11 @@ begin
             p := Copy(s, j, Length(word));
             t := Format('<span style=background-color:yellow>%s</span>', [p]);
             list[i] := Copy(s, 1, j - 1) + t;
-            j:=Length(word);
+            j := Length(word);
             for k := 1 to cnt - 1 do
             begin
               s := list[i + k];
-              dec(j,Length(p));
+              dec(j, Length(p));
               p := Copy(s, 1, j);
               t := Format('<span style=background-color:yellow>%s</span>', [p]);
               list[i + k] := t + Copy(s, Length(p) + 1, Length(s));
@@ -283,20 +286,20 @@ var
 begin
   for i := 0 to list.count - 1 do
   begin
-    s:=list[i];
-    t:='';
+    s := list[i];
+    t := '';
     if s = '' then
-      s:='<br>'
+      s := '<br>'
     else
       for j := 1 to Length(s) do
         if s[j] = ' ' then
-          t:='&nbsp;'+t
+          t := '&nbsp;' + t
         else
         begin
-          s:=t+s;
+          s := t + s;
           break;
         end;
-    list[i] := '<p>'+s;
+    list[i] := '<p>' + s;
   end;
 end;
 
@@ -587,7 +590,7 @@ begin
   begin
     DataSetPageProducer3.Tag := 1;
     if FileExists('templates/voice.txt') = true then
-      stream := TFileStream.Create('templates/voice.txt', fmOpenReadWrite)
+      stream := TFileStream.Create('templates/voice.txt', fmOpenWrite)
     else
       stream := TFileStream.Create('templates/voice.txt', fmCreate);
     stream.Position := stream.Size;
@@ -683,6 +686,37 @@ procedure TWebModule1.WebModule1WebActionItem5Action(Sender: TObject;
 begin
   Response.ContentType := 'text/html;charset=utf-8';
   Response.Content := PageProducer3.Content;
+end;
+
+procedure TWebModule1.WebModule1WebActionItem6Action(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  stream: TFileStream;
+  list: TStringList;
+begin
+  if Request.MethodType = mtPost then
+  begin
+    if FileExists('templates/voice.txt') = true then
+      stream := TFileStream.Create('templates/voice.txt', fmOpenWrite)
+    else
+      stream := TFileStream.Create('templates/voice.txt', fmCreate);
+    stream.Position := stream.Size;
+    list := TStringList.Create;
+    try
+      list.Add('');
+      list.Add('(*ユーザー様から報告がありました*)');
+      list.Add(DateToStr(Now));
+      list.Add(Request.ContentFields.Values['help']);
+      list.Add('(*報告ここまで*)');
+      list.Add('');
+      list.SaveToStream(stream);
+    finally
+      stream.Free;
+      list.Free;
+    end;
+  end;
+  Response.ContentType := 'text/html;charset=utf-8';
+  Response.Content := PageProducer5.Content;
 end;
 
 procedure TWebModule1.WebModuleBeforeDispatch(Sender: TObject;
