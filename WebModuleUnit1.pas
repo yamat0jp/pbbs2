@@ -76,7 +76,9 @@ type
     procedure makeComment(list: TStringList);
     function makeFooter(script: string): string;
     function ActiveRecordisNew: Boolean;
-    function FindText(word: string): string;
+    function rapperSearch: string;
+    function findText(word: string): string;
+    function onlyCheck(words: TStringList): Boolean;
   public
     { public êÈåæ }
   end;
@@ -188,16 +190,18 @@ begin
     BgColor := 'Silver';
 end;
 
-function TWebModule1.FindText(word: string): string;
+function TWebModule1.findText(word: string): string;
 var
   list: TStringList;
-  i, j: Integer;
+  i, j, cnt, k: Integer;
   s, t, p: string;
   x: Boolean;
+label back;
 begin
+  x := false;
+  result := '';
   if Length(word) = 0 then
     Exit;
-  x := false;
   list := TStringList.Create;
   try
     list.Text := FDTable2.FieldByName('rawdata').AsString;
@@ -205,17 +209,21 @@ begin
     j := 1;
     while i < list.count do
     begin
+    back:
       if Length(list[i]) = 0 then
       begin
         inc(i);
         continue;
       end;
-      if i < list.count - 1 then
-        s := list[i] + list[i + 1]
-      else
-        s := list[i];
-      if j > Length(s) then
-        j := 1;
+      s := '';
+      cnt := 0;
+      while Length(s)-j+1 <= Length(word) do
+      begin
+        s := s + list[i + cnt];
+        inc(cnt);
+        if i + cnt = list.count then
+          break;
+      end;
       while j <= Length(list[i]) do
         if (SameText(s[j], word[1]) = true) and
           (SameText(Copy(s, j, Length(word)), word) = true) then
@@ -239,17 +247,24 @@ begin
             p := Copy(s, j, Length(word));
             t := Format('<span style=background-color:yellow>%s</span>', [p]);
             list[i] := Copy(s, 1, j - 1) + t;
-            s := list[i + 1];
-            p := Copy(s, 1, Length(word) - Length(p));
-            t := Format('<span style=background-color:yellow>%s</span>', [p]);
-            list[i + 1] := t + Copy(s, Length(p) + 1, Length(s));
-            inc(j, Length(p));
-            break;
+            j:=Length(word);
+            for k := 1 to cnt - 1 do
+            begin
+              s := list[i + k];
+              dec(j,Length(p));
+              p := Copy(s, 1, j);
+              t := Format('<span style=background-color:yellow>%s</span>', [p]);
+              list[i + k] := t + Copy(s, Length(p) + 1, Length(s));
+            end;
+            inc(i, cnt - 2);
+            j := Length(p);
+            goto back;
           end;
         end
         else
           inc(j);
       inc(i);
+      j := 1;
     end;
     makeComment(list);
     if x = true then
@@ -306,6 +321,37 @@ begin
     result := list.Text;
   finally
     list.Free;
+  end;
+end;
+
+function TWebModule1.onlyCheck(words: TStringList): Boolean;
+var
+  s, t: string;
+  Data: TStringList;
+  i, j: Integer;
+label go;
+begin
+  result := true;
+  Data := TStringList.Create;
+  try
+    for s in words do
+    begin
+      Data.Text := FDTable2.FieldByName('rawdata').AsString;
+      for i := 0 to Data.count - 1 do
+      begin
+        j := 0;
+        t := '';
+        if Length(t) < Length(s) then
+          t := t + Data[i + j];
+        if Pos(s, t) > 0 then
+          goto go;
+      end;
+      result := false;
+      break;
+    go:
+    end;
+  finally
+    Data.Free;
   end;
 end;
 
@@ -411,17 +457,17 @@ begin
         begin
           if Request.ContentFields.Values['filter'] = 'name' then
           begin
-            if FDTable2.FieldByName('name').AsString = s then
+            if SameText(FDTable2.FieldByName('name').AsString, s) = true then
               t := FDTable2.FieldByName('comment').AsString;
           end
           else
-            t := FindText(s);
+            t := rapperSearch;
           if t <> '' then
           begin
             list.Add(FDTable1.FieldByName('dbname').AsString + '  [ ' +
               FDTable2.FieldByName('cmnumber').AsString + ' ]<br>');
             list.Add(FDTable2.FieldByName('name').AsString);
-            list.Add(FDTable2.FieldByName('datetime').AsString+'<br>');
+            list.Add(FDTable2.FieldByName('datetime').AsString + '<br>');
             list.Add(t);
             list.Add('<hr>');
           end;
@@ -436,6 +482,33 @@ begin
     finally
       list.Free;
     end;
+  end
+  else if TagString = 'word' then
+    ReplaceText := Request.ContentFields.Values['word1'];
+end;
+
+function TWebModule1.rapperSearch: string;
+var
+  list: TStringList;
+begin
+  list := TStringList.Create;
+  try
+    list.QuoteChar := '"';
+    list.Delimiter := ' ';
+    list.DelimitedText := Request.ContentFields.Values['word1'];
+    case list.count of
+      0:
+        result := '';
+      1:
+        result := findText(list[0]);
+    else
+      if onlyCheck(list) = true then
+        result := FDTable2.FieldByName('comment').AsString
+      else
+        result := '';
+    end;
+  finally
+    list.Free;
   end;
 end;
 
