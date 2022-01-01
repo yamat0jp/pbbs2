@@ -278,10 +278,26 @@ end;
 
 procedure TWebModule1.makeComment(list: TStringList);
 var
-  i: Integer;
+  i, j: Integer;
+  s, t: string;
 begin
   for i := 0 to list.count - 1 do
-    list[i] := list[i] + '<br>';
+  begin
+    s:=list[i];
+    t:='';
+    if s = '' then
+      s:='<br>'
+    else
+      for j := 1 to Length(s) do
+        if s[j] = ' ' then
+          t:='&nbsp;'+t
+        else
+        begin
+          s:=t+s;
+          break;
+        end;
+    list[i] := '<p>'+s;
+  end;
 end;
 
 function TWebModule1.makeFooter(script: string): string;
