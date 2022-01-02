@@ -366,7 +366,7 @@ object WebModule1: TWebModule1
     Top = 160
   end
   object PageProducer5: TPageProducer
-    HTMLFile = 'C:\Users\yamat\Documents\GitHub\pbbs2\templates\help.htm'
+    HTMLFile = 'templates\help.htm'
     Left = 248
     Top = 264
   end

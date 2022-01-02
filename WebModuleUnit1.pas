@@ -13,7 +13,7 @@ uses System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Stan.Intf,
   Datasnap.DSProxyDispatcher, IPPeerClient, Datasnap.DSClientRest,
   Datasnap.DSClientMetadata, Datasnap.DSProxyJavaScript, Datasnap.DSHTTPCommon,
   Web.DBWeb, FireDAC.Stan.ExprFuncs, IniFiles, FireDAC.Phys.IB,
-  FireDAC.Phys.IBDef;
+  FireDAC.Phys.IBDef, System.AnsiStrings;
 
 type
   TWebModule1 = class(TWebModule)
@@ -82,6 +82,7 @@ type
     function rapperSearch: string;
     function findText(word: string): string;
     function onlyCheck(words: TStringList): Boolean;
+    function replaceRawData(data: string): string;
   public
     { public 宣言 }
   end;
@@ -512,8 +513,9 @@ var
 begin
   list := TStringList.Create;
   try
+    list.StrictDelimiter:=false;
     list.QuoteChar := '"';
-    list.Delimiter := ' ';
+    list.Delimiter := '　';
     list.DelimitedText := Request.ContentFields.Values['word1'];
     case list.count of
       0:
@@ -526,6 +528,22 @@ begin
       else
         result := '';
     end;
+  finally
+    list.Free;
+  end;
+end;
+
+function TWebModule1.replaceRawData(data: string): string;
+var
+  list: TStringList;
+  s: string;
+begin
+  result:=data;
+  list:=TStringList.Create;
+  try
+    list.DelimitedText:='死ね,阿保,馬鹿';
+    for s in list do
+      result:=ReplaceText(result,s,'*****');
   finally
     list.Free;
   end;
@@ -554,7 +572,7 @@ begin
       title := 'タイトルなし.';
     if name = '' then
       name := 'no name';
-    raw := Request.ContentFields.Values['comment'];
+    raw := replaceRawData(Request.ContentFields.Values['comment']);
     FDTable2.Last;
     i := FDTable2.FieldByName('cmnumber').AsInteger + 1;
     list := TStringList.Create;
