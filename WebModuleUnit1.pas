@@ -13,7 +13,7 @@ uses System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Stan.Intf,
   Datasnap.DSProxyDispatcher, IPPeerClient, Datasnap.DSClientRest,
   Datasnap.DSClientMetadata, Datasnap.DSProxyJavaScript, Datasnap.DSHTTPCommon,
   Web.DBWeb, FireDAC.Stan.ExprFuncs, IniFiles, FireDAC.Phys.IB,
-  FireDAC.Phys.IBDef, System.AnsiStrings;
+  FireDAC.Phys.IBDef, System.AnsiStrings, System.NetEncoding;
 
 type
   TWebModule1 = class(TWebModule)
@@ -40,6 +40,7 @@ type
     PageProducer4: TPageProducer;
     FDTable1DBNAME: TWideStringField;
     PageProducer5: TPageProducer;
+    DataSetPageProducer4: TDataSetPageProducer;
     procedure WebModule1WebActionItem1Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
@@ -71,6 +72,8 @@ type
       Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1WebActionItem6Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1WebActionItem7Action(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
   private
     { private 宣言 }
     count: Integer;
@@ -82,7 +85,7 @@ type
     function rapperSearch: string;
     function findText(word: string): string;
     function onlyCheck(words: TStringList): Boolean;
-    function replaceRawData(data: string): string;
+    function replaceRawData(Data: string): string;
   public
     { public 宣言 }
   end;
@@ -111,7 +114,14 @@ var
   i, cnt: Integer;
   s: string;
 begin
-  if TagString = 'main' then
+  if TagString = 'form' then
+  begin
+    if count * pagecount > FDTable2.RecordCount then
+      ReplaceText := DataSetPageProducer4.Content
+    else
+      ReplaceText := '<h1>書き込み最大数に達しました。これ以上書き込めません。</h1>';
+  end
+  else if TagString = 'main' then
   begin
     i := StrToIntDef(Request.QueryFields.Values['page'], 0);
     if (i = 0) or (i * count > FDTable2.RecordCount) then
@@ -284,23 +294,29 @@ procedure TWebModule1.makeComment(list: TStringList);
 var
   i, j: Integer;
   s, t: string;
+  enc: THTMLEncoding;
 begin
-  for i := 0 to list.count - 1 do
-  begin
-    s := list[i];
-    t := '';
-    if s = '' then
-      s := '<br>'
-    else
-      for j := 1 to Length(s) do
-        if s[j] = ' ' then
-          t := '&nbsp;' + t
-        else
-        begin
-          s := t + s;
-          break;
-        end;
-    list[i] := '<p>' + s;
+  enc := THTMLEncoding.Create;
+  try
+    for i := 0 to list.count - 1 do
+    begin
+      s := enc.Encode(list[i]);
+      t := '';
+      if s = '' then
+        s := '<br>'
+      else
+        for j := 1 to Length(s) do
+          if s[j] = ' ' then
+            t := t + '&nbsp;'
+          else
+          begin
+            s := t + s;
+            break;
+          end;
+      list[i] := '<p>' + s;
+    end;
+  finally
+    enc.Free;
   end;
 end;
 
@@ -513,7 +529,7 @@ var
 begin
   list := TStringList.Create;
   try
-    list.StrictDelimiter:=false;
+    list.StrictDelimiter := false;
     list.QuoteChar := '"';
     list.Delimiter := '　';
     list.DelimitedText := Request.ContentFields.Values['word1'];
@@ -533,17 +549,17 @@ begin
   end;
 end;
 
-function TWebModule1.replaceRawData(data: string): string;
+function TWebModule1.replaceRawData(Data: string): string;
 var
   list: TStringList;
   s: string;
 begin
-  result:=data;
-  list:=TStringList.Create;
+  result := Data;
+  list := TStringList.Create;
   try
-    list.DelimitedText:='死ね,阿保,馬鹿';
+    list.DelimitedText := '死ね,阿保,馬鹿,殺す';
     for s in list do
-      result:=ReplaceText(result,s,'*****');
+      result := ReplaceText(result, s, '*****');
   finally
     list.Free;
   end;
@@ -664,7 +680,7 @@ begin
   end;
   if Request.MethodType = mtPost then
   begin
-    if Request.ContentFields.Values['change'] = 'true' then
+    if Request.ContentFields.Values['name'] = 'change' then
     begin
       FDTable1.Edit;
       FDTable1.FieldByName('dbname').AsString :=
@@ -737,6 +753,28 @@ begin
   Response.Content := PageProducer5.Content;
 end;
 
+procedure TWebModule1.WebModule1WebActionItem7Action(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  dbname: string;
+  Encode: TURLEncoding;
+begin
+  dbname := Request.QueryFields.Values['db'];
+  if FDTable1.Locate('dbname', dbname) = true then
+  begin
+    FDTable1.Edit;
+    dbname := Request.ContentFields.Values['text'];
+    FDTable1.FieldByName('dbname').AsString := dbname;
+    FDTable1.Post;
+  end;
+  Encode := TURLEncoding.Create;
+  try
+    Response.SendRedirect('/admin?db=' + Encode.Encode(dbname));
+  finally
+    Encode.Free;
+  end;
+end;
+
 procedure TWebModule1.WebModuleBeforeDispatch(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
 begin
@@ -760,7 +798,7 @@ begin
   finally
     ini.Free;
   end;
-  DataSetTableProducer1.MaxRows := 2 * count;
+  DataSetTableProducer1.MaxRows := count;
 end;
 
 end.

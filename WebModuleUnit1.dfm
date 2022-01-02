@@ -32,6 +32,11 @@ object WebModule1: TWebModule1
       Name = 'WebActionItem6'
       PathInfo = '/help'
       OnAction = WebModule1WebActionItem6Action
+    end
+    item
+      Name = 'WebActionItem7'
+      PathInfo = '/rename'
+      OnAction = WebModule1WebActionItem7Action
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 321
@@ -325,18 +330,17 @@ object WebModule1: TWebModule1
         'bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFG' +
         'wb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" cross' +
         'origin="anonymous">'
-      '<form class=setting action=/admin?db=<#dbname> method=post>'
-      '<input type=hidden name=change value=true>'
+      '<form method=post>'
       
         #21517#31216#65306'<input type=edit name=text value=<#dbname>><input type=submit' +
-        ' value="'#22793#26356'">'
-      '</form>'
-      '<form class=delete action=/top?db=<#dbname> method=post>'
-      '<p style=align:center><input type=submit value="'#20840#21066#38500'">'
-      '</form>'
-      '<form action=/admin?db=<#dbname> method=post>'
+        ' formaction=/rename?db=<#dbname> value="'#22793#26356'">'
+      
+        '<p style=align:center><input type=submit formaction=/top?db=<#db' +
+        'name> value="'#20840#21066#38500'">'
       '<#table>'
-      '<input type=submit value="'#21066#38500'"><input type=reset value="'#21462#12426#28040#12375'">'
+      
+        '<input type=submit formaction=/admin?db=<#dbname> value="'#21066#38500'"><in' +
+        'put type=reset value="'#21462#12426#28040#12375'">'
       '</form>'
       '<#footer>'
       '<#section>'
@@ -369,5 +373,11 @@ object WebModule1: TWebModule1
     HTMLFile = 'templates\help.htm'
     Left = 248
     Top = 264
+  end
+  object DataSetPageProducer4: TDataSetPageProducer
+    HTMLFile = 'templates/form.htm'
+    DataSet = FDTable1
+    Left = 160
+    Top = 224
   end
 end
