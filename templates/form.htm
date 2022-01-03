@@ -1,7 +1,33 @@
-      <form action="/bbs?db=<#dbname>" method="post">
-      <div style="HEIGHT: 15px; WIDTH: 70px; POSITION: relative; DISPLAY: inline" ms_positioning="FlowLayout">お名前
-      </div><input name="name" value="<#username>">
-      <div style="HEIGHT: 15px; WIDTH: 70px; POSITION: relative; DISPLAY: inline" ms_positioning="FlowLayout">タイトル
-      </div><input name="title">  <input type="submit" value="送信">  <p></p>
-      <p><textarea name="comment" style="HEIGHT: 156px; WIDTH: 633px" rows="1" cols="39"></textarea>
-      </form>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <header>
+    <a name=top></a>
+    <form action=/bbs?db=<#dbname> method="post">
+      <p><br></p>
+      <div class="row justify-content-center"><div class="col-10">
+      <div class="container">
+        <div class="form-row">
+        <div class="form-inline p-3">
+          <div class="input-group col-4">
+          <div class=input-group-prepend><span class=input-group-text>お名前</span></div>
+            <input name="name" id=name1 class="form-control mr-50" value=<#username>>
+          </div>
+          <div class="input-group col-7">
+          <div class=input-group-prepend><span class=input-group-text>タイトル</span></div>
+            <input name="title" id=title1 class=form-control placeholder="タイトルなし." value=<#title>>
+          </div>
+            <div class="form-group col-1"><input class="btn btn-primary ml-3" type="submit" value="送信"></div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group align-self-center w-100">
+          <label for=text1>本文<span style=color:red>必須</span></label>
+          <textarea id=text1 style="font-size:1.75em" name="comment" rows=4
+                class="form-control w-100 sjadpw-lg" required placeholder="コメントなどを入力してください."><#comment></textarea>
+          </div>
+        </div>
+        </div>
+      </div>
+      </div></div>
+    </form>
+    </header>

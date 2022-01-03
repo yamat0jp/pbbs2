@@ -34,6 +34,7 @@ object WebModule1: TWebModule1
       OnAction = WebModule1WebActionItem6Action
     end
     item
+      MethodType = mtPost
       Name = 'WebActionItem7'
       PathInfo = '/rename'
       OnAction = WebModule1WebActionItem7Action
@@ -344,7 +345,7 @@ object WebModule1: TWebModule1
       '</form>'
       '<#footer>'
       '<#section>'
-      '<a href=/bbs?db=<#dbname>>'#12418#12393#12427'</a>'
+      '<p style=text-align:center><a href=/bbs?db=<#dbname>>'#12418#12393#12427'</a></p>'
       '</body>'
       '</html>')
     OnHTMLTag = PageProducer2HTMLTag
