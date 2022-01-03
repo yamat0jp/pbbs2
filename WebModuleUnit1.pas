@@ -310,7 +310,7 @@ begin
             t := t + '&nbsp;'
           else
           begin
-            s := t + s;
+            s := t + Copy(s, Length(t) + 1, Length(s));
             break;
           end;
       list[i] := '<p>' + s;
@@ -372,6 +372,8 @@ begin
   try
     for s in words do
     begin
+      if s = '' then
+        continue;
       Data.Text := FDTable2.FieldByName('rawdata').AsString;
       for i := 0 to Data.count - 1 do
       begin
@@ -480,6 +482,7 @@ procedure TWebModule1.PageProducer3HTMLTag(Sender: TObject; Tag: TTag;
 var
   list: TStringList;
   s, t: string;
+  i: Integer;
 begin
   if (TagString = 'main') and (Request.MethodType = mtPost) then
   begin
@@ -520,7 +523,27 @@ begin
     end;
   end
   else if TagString = 'word' then
-    ReplaceText := Request.ContentFields.Values['word1'];
+  begin
+    s := '';
+    list := TStringList.Create;
+    try
+      list.QuoteChar := '"';
+      list.Delimiter := ' ';
+      list.DelimitedText := Request.ContentFields.Values['word1'];
+      i := 0;
+      while i < list.count do
+      begin
+        if i = list.count - 1 then
+          s := s + list[i]
+        else
+          s := s + list[i] + '@';
+        inc(i);
+      end;
+      ReplaceText := s;
+    finally
+      list.Free;
+    end;
+  end;
 end;
 
 function TWebModule1.rapperSearch: string;
