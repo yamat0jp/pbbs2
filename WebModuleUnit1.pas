@@ -74,6 +74,8 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1WebActionItem7Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure WebModule1WebActionItem8Action(Sender: TObject;
+      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
   private
     { private êÈåæ }
     count: Integer;
@@ -206,87 +208,98 @@ end;
 
 function TWebModule1.findText(word: string): string;
 var
-  list: TStringList;
-  i, j, cnt, k: Integer;
-  s, t, p: string;
+  list, findResult: TStringList;
+  i, j, cnt, k, Last: Integer;
+  s, p, str: string;
   x: Boolean;
-label back;
+  enc: THTMLEncoding;
 begin
   x := false;
   result := '';
   if Length(word) = 0 then
     Exit;
+  enc := THTMLEncoding.Create;
   list := TStringList.Create;
+  findResult := TStringList.Create;
   try
     list.Text := FDTable2.FieldByName('rawdata').AsString;
     i := 0;
     j := 1;
     while i < list.count do
     begin
-    back:
-      if Length(list[i]) = 0 then
+      Last := j;
+      s := list[i];
+      while (s <> '') and (s[j] <> word[1]) and (j <= Length(s)) do
+        inc(j);
+      if j > Length(s) then
       begin
+        if (Last = 1) or (i >= findResult.count) then
+          findResult.Add(enc.Encode(s))
+        else
+          findResult[i] := findResult[i] +
+            enc.Encode(Copy(s, Last, j - Last + 1));
+        j := 1;
         inc(i);
         continue;
       end;
-      s := '';
       cnt := 0;
-      while Length(s) - j + 1 <= Length(word) do
+      while j + Length(word) - 1 > Length(s) do
       begin
-        s := s + list[i + cnt];
         inc(cnt);
         if i + cnt = list.count then
           break;
+        s := s + list[i + cnt];
       end;
-      while j <= Length(list[i]) do
-        if (SameText(s[j], word[1]) = true) and
-          (SameText(Copy(s, j, Length(word)), word) = true) then
+      if SameText(Copy(s, j, Length(word)), word) = true then
+      begin
+        x := true;
+        s := list[i];
+        if j + Length(word) - 1 <= Length(list[i]) then
         begin
-          if j + Length(word) - 1 <= Length(list[i]) then
-          begin
-            s := list[i];
-            x := true;
-            p := Copy(s, j, Length(word));
-            t := Format('<span style=background-color:yellow>%s</span>', [p]);
-            list[i] := Copy(s, 1, j - 1) + t + Copy(s, j + Length(word),
-              Length(s));
-            s := list[i];
-            inc(j, Length(t));
-            continue;
-          end
+          p := enc.Encode(word);
+          str := Format('<span style=background-color:yellow>%s</span>', [p]);
+          str := enc.Encode(Copy(s, Last, j - Last)) + str;
+          if Last = 1 then
+            findResult.Add(str)
           else
-          begin
-            s := list[i];
-            x := true;
-            p := Copy(s, j, Length(word));
-            t := Format('<span style=background-color:yellow>%s</span>', [p]);
-            list[i] := Copy(s, 1, j - 1) + t;
-            j := Length(word);
-            for k := 1 to cnt - 1 do
-            begin
-              s := list[i + k];
-              dec(j, Length(p));
-              p := Copy(s, 1, j);
-              t := Format('<span style=background-color:yellow>%s</span>', [p]);
-              list[i + k] := t + Copy(s, Length(p) + 1, Length(s));
-            end;
-            inc(i, cnt - 2);
-            j := Length(p);
-            goto back;
-          end;
+            findResult[i] := findResult[i] + str;
+          inc(j, Length(word));
+          Last := j;
         end
         else
-          inc(j);
-      inc(i);
-      j := 1;
+        begin
+          str := enc.Encode(Copy(s, Last, j - Last));
+          p := Copy(s, j, Length(word));
+          findResult.Add
+            (str + Format('<span style=background-color:yellow>%s</span>',
+            [enc.Encode(p)]));
+          j := Length(word);
+          for k := 1 to cnt do
+          begin
+            inc(i);
+            s := list[i];
+            dec(j, Length(p));
+            p := Copy(s, 1, j);
+            str := Format('<span style=background-color:yellow>%s</span>',
+              [enc.Encode(p)]);
+            findResult.Add(str);
+          end;
+          j := Length(p) + 1;
+          Last := j;
+        end;
+      end
+      else
+        inc(j);
     end;
-    makeComment(list);
+    makeComment(findResult);
     if x = true then
-      result := list.Text
+      result := findResult.Text
     else
       result := '';
   finally
     list.Free;
+    findResult.Free;
+    enc.Free;
   end;
 end;
 
@@ -294,29 +307,23 @@ procedure TWebModule1.makeComment(list: TStringList);
 var
   i, j: Integer;
   s, t: string;
-  enc: THTMLEncoding;
 begin
-  enc := THTMLEncoding.Create;
-  try
-    for i := 0 to list.count - 1 do
-    begin
-      s := enc.Encode(list[i]);
-      t := '';
-      if s = '' then
-        s := '<br>'
-      else
-        for j := 1 to Length(s) do
-          if s[j] = ' ' then
-            t := t + '&nbsp;'
-          else
-          begin
-            s := t + Copy(s, Length(t) + 1, Length(s));
-            break;
-          end;
-      list[i] := '<p>' + s;
-    end;
-  finally
-    enc.Free;
+  for i := 0 to list.count - 1 do
+  begin
+    s := list[i];
+    t := '';
+    if s = '' then
+      s := '<br>'
+    else
+      for j := 1 to Length(s) do
+        if s[j] = ' ' then
+          t := t + '&nbsp;'
+        else
+        begin
+          s := t + Copy(s, j - 1, Length(s));
+          break;
+        end;
+    list[i] := '<p>' + s;
   end;
 end;
 
@@ -573,6 +580,8 @@ begin
 end;
 
 function TWebModule1.replaceRawData(Data: string): string;
+const
+  ng = 'éÄÇÀ,à¢ï€,îné≠,éEÇ∑';
 var
   list: TStringList;
   s: string;
@@ -580,7 +589,7 @@ begin
   result := Data;
   list := TStringList.Create;
   try
-    list.DelimitedText := 'éÄÇÀ,à¢ï€,îné≠,éEÇ∑';
+    list.DelimitedText := ng;
     for s in list do
       result := ReplaceText(result, s, '*****');
   finally
@@ -597,11 +606,10 @@ var
   i: Integer;
 begin
   dbname := Request.QueryFields.Values['db'];
-  if (dbname <> '') and (FDTable1.Locate('dbname', dbname) = false) then
+  if FDTable1.Locate('dbname', dbname) = false then
   begin
-    FDTable1.Last;
-    i := FDTable1.FieldByName('dbnumber').AsInteger + 1;
-    FDTable1.AppendRecord([i, dbname]);
+    Handled := false;
+    Exit;
   end;
   if Request.MethodType = mtPost then
   begin
@@ -795,6 +803,33 @@ begin
     Response.SendRedirect('/admin?db=' + Encode.Encode(dbname));
   finally
     Encode.Free;
+  end;
+end;
+
+procedure TWebModule1.WebModule1WebActionItem8Action(Sender: TObject;
+  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+const
+  str = 'ñ¢äJïï åfé¶î¬ ';
+var
+  i, j, k: Integer;
+  s: string;
+begin
+  FDTable1.Filtered := false;
+  try
+    FDTable1.Last;
+    i := FDTable1.FieldByName('dbnumber').AsInteger + 1;
+    for k := 1 to 10 do
+    begin
+      j := 0;
+      repeat
+        inc(j);
+        s := str + j.toString;
+      until FDTable1.Locate('dbname', s) = false;
+      FDTable1.AppendRecord([i, s]);
+      inc(i);
+    end;
+  finally
+    FDTable1.Filtered := true;
   end;
 end;
 
