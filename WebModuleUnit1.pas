@@ -259,7 +259,7 @@ begin
           p := enc.Encode(word);
           str := Format('<span style=background-color:yellow>%s</span>', [p]);
           str := enc.Encode(Copy(s, Last, j - Last)) + str;
-          if Last = 1 then
+          if (Last = 1) or (i >= findResult.Count) then
             findResult.Add(str)
           else
             findResult[i] := findResult[i] + str;
@@ -592,6 +592,7 @@ begin
     list.DelimitedText := ng;
     for s in list do
       result := ReplaceText(result, s, '*****');
+    // result:=TNetEncoding.HTML.Encode(result);
   finally
     list.Free;
   end;
@@ -624,7 +625,7 @@ begin
     i := FDTable2.FieldByName('cmnumber').AsInteger + 1;
     list := TStringList.Create;
     try
-      list.Text := raw;
+      list.Text := TNetEncoding.HTML.Encode(raw);
       makeComment(list);
       FDTable2.AppendRecord([FDTable1.FieldByName('dbnumber').AsInteger, i,
         title, name, list.Text, Now, raw]);
