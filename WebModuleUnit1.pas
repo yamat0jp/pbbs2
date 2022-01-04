@@ -225,9 +225,9 @@ begin
     list.Text := FDTable2.FieldByName('rawdata').AsString;
     i := 0;
     j := 1;
+    Last := 1;
     while i < list.count do
     begin
-      Last := j;
       s := list[i];
       while (s <> '') and (s[j] <> word[1]) and (j <= Length(s)) do
         inc(j);
@@ -239,6 +239,7 @@ begin
           findResult[i] := findResult[i] +
             enc.Encode(Copy(s, Last, j - Last + 1));
         j := 1;
+        Last := 1;
         inc(i);
         continue;
       end;
@@ -259,12 +260,11 @@ begin
           p := enc.Encode(word);
           str := Format('<span style=background-color:yellow>%s</span>', [p]);
           str := enc.Encode(Copy(s, Last, j - Last)) + str;
-          if (Last = 1) or (i >= findResult.Count) then
+          if (Last = 1) or (i >= findResult.count) then
             findResult.Add(str)
           else
             findResult[i] := findResult[i] + str;
           inc(j, Length(word));
-          Last := j;
         end
         else
         begin
@@ -285,11 +285,14 @@ begin
             findResult.Add(str);
           end;
           j := Length(p) + 1;
-          Last := j;
         end;
       end
       else
+      begin
         inc(j);
+        continue;
+      end;
+      Last := j;
     end;
     makeComment(findResult);
     if x = true then
