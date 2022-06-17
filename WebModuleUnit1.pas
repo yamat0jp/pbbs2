@@ -7,13 +7,11 @@ uses System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Stan.Intf,
   FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
   FireDAC.Phys.MySQL, FireDAC.Phys.MySQLDef, FireDAC.Stan.Param, FireDAC.DatS,
   FireDAC.DApt.Intf, FireDAC.DApt, Data.DB, FireDAC.Comp.DataSet,
-  FireDAC.Comp.Client, Web.HTTPProd, Web.DSProd, Datasnap.DSCommonServer,
-  Datasnap.DSServer, Datasnap.DSMetadata, Datasnap.DSServerMetadata,
-  IPPeerServer, Datasnap.DSHTTP, Datasnap.DSHTTPWebBroker,
-  Datasnap.DSProxyDispatcher, IPPeerClient, Datasnap.DSClientRest,
-  Datasnap.DSClientMetadata, Datasnap.DSProxyJavaScript, Datasnap.DSHTTPCommon,
+  FireDAC.Comp.Client, Web.HTTPProd,
   Web.DBWeb, FireDAC.Stan.ExprFuncs, IniFiles, FireDAC.Phys.IB,
-  FireDAC.Phys.IBDef, System.AnsiStrings, System.NetEncoding;
+  FireDAC.Phys.IBDef, System.AnsiStrings, System.NetEncoding,
+  FireDAC.VCLUI.Wait,
+  Web.DSProd, FireDAC.Phys.PG, FireDAC.Phys.PGDef;
 
 type
   TWebModule1 = class(TWebModule)
@@ -22,25 +20,24 @@ type
     FDTable2: TFDTable;
     DataSource1: TDataSource;
     DataSetPageProducer1: TDataSetPageProducer;
-    WebFileDispatcher1: TWebFileDispatcher;
     PageProducer1: TPageProducer;
     DataSetPageProducer2: TDataSetPageProducer;
     DataSetTableProducer1: TDataSetTableProducer;
     FDTable1DBNUMBER: TIntegerField;
-    FDTable2DBNUMBER: TIntegerField;
-    FDTable2CMNUMBER: TIntegerField;
-    FDTable2COMMENT: TWideMemoField;
-    FDTable2DATETIME: TDateField;
     PageProducer2: TPageProducer;
-    FDTable2TITLE: TWideStringField;
-    FDTable2NAME: TWideStringField;
-    FDTable2RAWDATA: TWideMemoField;
     DataSetPageProducer3: TDataSetPageProducer;
     PageProducer3: TPageProducer;
     PageProducer4: TPageProducer;
     FDTable1DBNAME: TWideStringField;
     PageProducer5: TPageProducer;
     DataSetPageProducer4: TDataSetPageProducer;
+    FDTable2dbnumber: TIntegerField;
+    FDTable2cmnumber: TIntegerField;
+    FDTable2title: TWideStringField;
+    FDTable2name: TWideStringField;
+    FDTable2comment: TWideStringField;
+    FDTable2datetime: TSQLTimeStampField;
+    WebFileDispatcher1: TWebFileDispatcher;
     procedure WebModule1WebActionItem1Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
@@ -48,8 +45,6 @@ type
     procedure WebModule1WebActionItem3Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure PageProducer1HTMLTag(Sender: TObject; Tag: TTag;
-      const TagString: string; TagParams: TStrings; var ReplaceText: string);
-    procedure DataSetPageProducer2HTMLTag(Sender: TObject; Tag: TTag;
       const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModule1WebActionItem4Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
@@ -76,6 +71,8 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1WebActionItem8Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure DataSetPageProducer2HTMLTag(Sender: TObject; Tag: TTag;
+      const TagString: string; TagParams: TStrings; var ReplaceText: string);
   private
     { private êÈåæ }
     count: Integer;
@@ -141,23 +138,32 @@ begin
     while (FDTable2.Eof = false) and (cnt > 0) do
     begin
       ReplaceText := ReplaceText + DataSetPageProducer2.Content +
-        Format('<p style=text-align:end><a href=/alert?db=%s&page=%d>ïÒçê</a>',
+        Format('<p style=text-align:end><a href=/alert?db=%s&page=%d>ïÒçê</a></p>',
         [s, FDTable2.FieldByName('cmnumber').AsInteger]);
       FDTable2.Next;
       dec(cnt);
     end;
   end
   else if TagString = 'footer' then
-    ReplaceText := makeFooter('bbs');;
+    ReplaceText := makeFooter('bbs');
 end;
 
 procedure TWebModule1.DataSetPageProducer2HTMLTag(Sender: TObject; Tag: TTag;
   const TagString: string; TagParams: TStrings; var ReplaceText: string);
+var
+  list: TStringList;
 begin
-  if TagString = 'dbname' then
-    ReplaceText := FDTable1.FieldByName('dbname').AsString
-  else if TagString = 'comment' then
-    ReplaceText := FDTable2.FieldByName('comment').AsString;
+  if TagString = 'comment' then
+  begin
+    list := TStringList.Create;
+    try
+      list.Text := FDTable2.FieldByName('comment').AsWideString;
+      makeComment(list);
+      ReplaceText := list.Text;
+    finally
+      list.Free;
+    end;
+  end;
 end;
 
 procedure TWebModule1.DataSetPageProducer3HTMLTag(Sender: TObject; Tag: TTag;
@@ -222,7 +228,7 @@ begin
   list := TStringList.Create;
   findResult := TStringList.Create;
   try
-    list.Text := FDTable2.FieldByName('rawdata').AsString;
+    list.Text := FDTable2.FieldByName('comment').AsString;
     i := 0;
     j := 1;
     Last := 1;
@@ -384,7 +390,7 @@ begin
     begin
       if s = '' then
         continue;
-      Data.Text := FDTable2.FieldByName('rawdata').AsString;
+      Data.Text := FDTable2.FieldByName('comment').AsString;
       for i := 0 to Data.count - 1 do
       begin
         j := 0;
@@ -446,7 +452,7 @@ begin
         else
           list.Add('<div class="carousel-item">');
         list.Add(Format
-          ('<img class="d-sm-block d-none" src=img/slide%d.jpg style="float:right;height:465px">',
+          ('<img class="d-sm-block d-none" src="img/slide%d.jpg" style="float:right;height:465px">',
           [i + 1]));
         list.Add('<div style="height:465px"></div>');
         list.Add('<div class="carousel-caption text-left" style="font-size:1.5rem;">');
@@ -595,7 +601,6 @@ begin
     list.DelimitedText := ng;
     for s in list do
       result := ReplaceText(result, s, '*****');
-    // result:=TNetEncoding.HTML.Encode(result);
   finally
     list.Free;
   end;
@@ -629,9 +634,8 @@ begin
     list := TStringList.Create;
     try
       list.Text := TNetEncoding.HTML.Encode(raw);
-      makeComment(list);
       FDTable2.AppendRecord([FDTable1.FieldByName('dbnumber').AsInteger, i,
-        title, name, list.Text, Now, raw]);
+        title, name, list.Text, Now]);
     finally
       list.Free;
     end;
@@ -658,10 +662,10 @@ begin
   else if Request.MethodType = mtPost then
   begin
     DataSetPageProducer3.Tag := 1;
-    if FileExists('templates/voice.txt') = true then
-      stream := TFileStream.Create('templates/voice.txt', fmOpenWrite)
+    if FileExists('data/voice.txt') = true then
+      stream := TFileStream.Create('data/voice.txt', fmOpenWrite)
     else
-      stream := TFileStream.Create('templates/voice.txt', fmCreate);
+      stream := TFileStream.Create('data/voice.txt', fmCreate);
     stream.Position := stream.Size;
     list := TStringList.Create;
     try
@@ -672,7 +676,7 @@ begin
       list.Add(FDTable2.FieldByName('title').AsString);
       list.Add(FDTable2.FieldByName('name').AsString);
       list.Add(FDTable2.FieldByName('datetime').AsString);
-      list.Add(FDTable2.FieldByName('rawdata').AsString);
+      list.Add(FDTable2.FieldByName('comment').AsString);
       list.Add(Request.ContentFields.Values['com']);
       list.Add('(*ïÒçêÇ±Ç±Ç‹Ç≈*)');
       list.Add('');
@@ -852,7 +856,7 @@ procedure TWebModule1.WebModuleCreate(Sender: TObject);
 var
   ini: TIniFile;
 begin
-  ini := TIniFile.Create('templates/setting.ini');
+  ini := TIniFile.Create('data/setting.ini');
   try
     count := ini.ReadInteger('data', 'count', 10);
     pagecount := ini.ReadInteger('data', 'pagecount', 10);

@@ -50,19 +50,17 @@ object WebModule1: TWebModule1
   Width = 415
   object FDConnection1: TFDConnection
     Params.Strings = (
-      'Database=C:\Users\yamat\Documents\GitHub\pbbs2\templates\DATA.IB'
-      'User_Name=sysdba'
-      'Password=masterkey'
+      'Database=postgres'
       'CharacterSet=UTF8'
-      'OpenMode=OpenOrCreate'
-      'DriverID=iB')
+      'User_Name=postgres'
+      'Password=kainushi'
+      'DriverID=PG')
     Connected = True
     Left = 328
     Top = 24
   end
   object FDTable1: TFDTable
     Active = True
-    Filtered = True
     Filter = 'dbname not like '#39#26410#38283#23553'%'#39
     IndexFieldNames = 'dbnumber'
     Connection = FDConnection1
@@ -80,11 +78,12 @@ object WebModule1: TWebModule1
       FieldName = 'DBNAME'
       Origin = 'DBNAME'
       Required = True
-      Size = 128
+      Size = 64
     end
   end
   object FDTable2: TFDTable
     Active = True
+    Filtered = True
     IndexFieldNames = 'dbnumber;cmnumber'
     MasterSource = DataSource1
     MasterFields = 'dbnumber'
@@ -93,44 +92,32 @@ object WebModule1: TWebModule1
     TableName = 'maintable'
     Left = 328
     Top = 160
-    object FDTable2DBNUMBER: TIntegerField
-      FieldName = 'DBNUMBER'
-      Origin = 'DBNUMBER'
-      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
-      Required = True
+    object FDTable2dbnumber: TIntegerField
+      FieldName = 'dbnumber'
+      Origin = 'dbnumber'
     end
-    object FDTable2CMNUMBER: TIntegerField
-      FieldName = 'CMNUMBER'
-      Origin = 'CMNUMBER'
-      ProviderFlags = [pfInUpdate, pfInWhere, pfInKey]
-      Required = True
+    object FDTable2cmnumber: TIntegerField
+      FieldName = 'cmnumber'
+      Origin = 'cmnumber'
     end
-    object FDTable2TITLE: TWideStringField
-      FieldName = 'TITLE'
-      Origin = 'TITLE'
-      Required = True
-      Size = 128
+    object FDTable2title: TWideStringField
+      FieldName = 'title'
+      Origin = 'title'
+      Size = 30
     end
-    object FDTable2NAME: TWideStringField
-      FieldName = 'NAME'
-      Origin = 'NAME'
-      Required = True
-      Size = 128
+    object FDTable2name: TWideStringField
+      FieldName = 'name'
+      Origin = 'name'
+      Size = 30
     end
-    object FDTable2COMMENT: TWideMemoField
-      FieldName = 'COMMENT'
-      Origin = 'COMMENT'
-      BlobType = ftWideMemo
+    object FDTable2comment: TWideStringField
+      FieldName = 'comment'
+      Origin = '"comment"'
+      Size = 300
     end
-    object FDTable2DATETIME: TDateField
-      FieldName = 'DATETIME'
-      Origin = 'DATETIME'
-      Required = True
-    end
-    object FDTable2RAWDATA: TWideMemoField
-      FieldName = 'RAWDATA'
-      Origin = 'RAWDATA'
-      BlobType = ftWideMemo
+    object FDTable2datetime: TSQLTimeStampField
+      FieldName = 'datetime'
+      Origin = 'datetime'
     end
   end
   object DataSource1: TDataSource
@@ -144,41 +131,6 @@ object WebModule1: TWebModule1
     OnHTMLTag = DataSetPageProducer1HTMLTag
     Left = 48
     Top = 88
-  end
-  object WebFileDispatcher1: TWebFileDispatcher
-    WebFileExtensions = <
-      item
-        MimeType = 'text/css'
-        Extensions = 'css'
-      end
-      item
-        MimeType = 'text/html'
-        Extensions = 'html;htm'
-      end
-      item
-        MimeType = 'text/javascript'
-        Extensions = 'js'
-      end
-      item
-        MimeType = 'image/jpeg'
-        Extensions = 'jpeg;jpg'
-      end
-      item
-        MimeType = 'image/x-png'
-        Extensions = 'png'
-      end>
-    WebDirectories = <
-      item
-        DirectoryAction = dirInclude
-        DirectoryMask = '*'
-      end
-      item
-        DirectoryAction = dirExclude
-        DirectoryMask = '\templates\*'
-      end>
-    RootDirectory = '.'
-    Left = 48
-    Top = 24
   end
   object PageProducer1: TPageProducer
     HTMLDoc.Strings = (
@@ -223,7 +175,6 @@ object WebModule1: TWebModule1
       '  fjs.parentNode.insertBefore(js, fjs);'
       '}(document, '#39'script'#39', '#39'facebook-jssdk'#39'));</script>'
       '<header><h1 style=text-align:center>'#28961#26009#38651#23376#25522#31034#26495#12408#12424#12358#12371#12381'</h1></header>'
-      ''
       '<div id="slide-1" class="carousel slide" data-ride="carousel">'
       #9'<ol class="carousel-indicators">'
       '        <#first>'
@@ -388,5 +339,41 @@ object WebModule1: TWebModule1
     DataSet = FDTable1
     Left = 160
     Top = 224
+  end
+  object WebFileDispatcher1: TWebFileDispatcher
+    WebFileExtensions = <
+      item
+        MimeType = 'text/css'
+        Extensions = 'css'
+      end
+      item
+        MimeType = 'text/html'
+        Extensions = 'html;htm'
+      end
+      item
+        MimeType = 'application/javascript'
+        Extensions = 'js'
+      end
+      item
+        MimeType = 'image/jpeg'
+        Extensions = 'jpeg;jpg'
+      end
+      item
+        MimeType = 'image/png'
+        Extensions = 'png'
+      end>
+    WebDirectories = <
+      item
+        DirectoryAction = dirInclude
+        DirectoryMask = '*'
+      end
+      item
+        DirectoryAction = dirExclude
+        DirectoryMask = '\templates\*'
+      end>
+    RootDirectory = '.'
+    VirtualPath = '/'
+    Left = 128
+    Top = 24
   end
 end

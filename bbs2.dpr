@@ -1,8 +1,6 @@
 program bbs2;
 {$APPTYPE GUI}
 
-{$R *.dres}
-
 uses
   Vcl.Forms,
   Web.WebReq,
