@@ -55,12 +55,10 @@ object WebModule1: TWebModule1
       'User_Name=postgres'
       'Password=kainushi'
       'DriverID=PG')
-    Connected = True
     Left = 328
     Top = 24
   end
   object FDTable1: TFDTable
-    Active = True
     Filter = 'dbname not like '#39#26410#38283#23553'%'#39
     IndexFieldNames = 'dbnumber'
     Connection = FDConnection1
@@ -82,7 +80,6 @@ object WebModule1: TWebModule1
     end
   end
   object FDTable2: TFDTable
-    Active = True
     Filtered = True
     IndexFieldNames = 'dbnumber;cmnumber'
     MasterSource = DataSource1
@@ -292,19 +289,21 @@ object WebModule1: TWebModule1
         'origin="anonymous">'
       '<form method=post>'
       
-        #21517#31216#65306'<input type=edit name=text value=<#dbname>><input type=submit' +
-        ' formaction=/rename?db=<#dbname> value="'#22793#26356'">'
+        #21517#31216#65306'<input type=edit name=text value="<#dbname>"><input type=subm' +
+        'it formaction=/rename?db=<#dbname> value="'#22793#26356'">'
       
         '<p style=align:center><input type=submit formaction=/top?db=<#db' +
         'name> value="'#20840#21066#38500'">'
       '<#table>'
       
-        '<input type=submit formaction=/admin?db=<#dbname> value="'#21066#38500'"><in' +
-        'put type=reset value="'#21462#12426#28040#12375'">'
+        '<input type=submit formaction="/admin?db=<#dbname>" value="'#21066#38500'"><' +
+        'input type=reset value="'#21462#12426#28040#12375'">'
       '</form>'
       '<#footer>'
       '<#section>'
-      '<p style=text-align:center><a href=/bbs?db=<#dbname>>'#12418#12393#12427'</a></p>'
+      
+        '<p style=text-align:center><a href="/bbs?db=<#dbname>">'#12418#12393#12427'</a></' +
+        'p>'
       '</body>'
       '</html>')
     OnHTMLTag = PageProducer2HTMLTag
@@ -368,7 +367,7 @@ object WebModule1: TWebModule1
         DirectoryMask = '*'
       end
       item
-        DirectoryAction = dirExclude
+        DirectoryAction = dirInclude
         DirectoryMask = '\templates\*'
       end>
     RootDirectory = '.'

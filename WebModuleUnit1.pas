@@ -138,7 +138,7 @@ begin
     while (FDTable2.Eof = false) and (cnt > 0) do
     begin
       ReplaceText := ReplaceText + DataSetPageProducer2.Content +
-        Format('<p style=text-align:end><a href=/alert?db=%s&page=%d>ïÒçê</a></p>',
+        Format('<p style=text-align:end><a href="/alert?db=%s&page=%d">ïÒçê</a></p>',
         [s, FDTable2.FieldByName('cmnumber').AsInteger]);
       FDTable2.Next;
       dec(cnt);
@@ -368,7 +368,7 @@ begin
         [script, s, i, i]));
     end;
     list.Add(Format
-      ('<li class="page-item %s"><a class="page-link" href=/%s?db=%s>%s</a></li></ul></nav>',
+      ('<li class="page-item %s"><a class="page-link" href="/%s?db=%s">%s</a></li></ul></nav>',
       [t, script, s, p]));
     result := list.Text;
   finally
@@ -426,7 +426,7 @@ begin
     begin
       s := FDTable1.FieldByName('dbname').AsString;
       ReplaceText := ReplaceText +
-        Format('<p><a href=/bbs?db=%s>%s</a></p>', [s, s]);
+        Format('<p><a href="/bbs?db=%s">%s</a></p>', [s, s]);
       FDTable1.Next;
     end;
   end
@@ -467,7 +467,7 @@ begin
             s := '';
           FDTable1.Next;
           list.Add(Format
-            ('<p><a href=/bbs?db=%s style=%s; target=_blank>%s</a>',
+            ('<p><a href="/bbs?db=%s" style=%s; target=_blank>%s</a>',
             [t, s, t]));
         end;
         list.Add('</div></div>');
@@ -692,9 +692,12 @@ end;
 
 procedure TWebModule1.WebModule1WebActionItem3Action(Sender: TObject;
   Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  s: string;
 begin
-  if (Request.MethodType = mtPost) and
-    (FDTable1.Locate('dbname', Request.QueryFields.Values['db']) = true) then
+  s := Request.QueryFields.Values['db'];
+  if (Request.MethodType = mtPost) and (FDTable1.Locate('dbname', s) = true)
+  then
   begin
     FDTable2.First;
     while FDTable2.Eof = false do
@@ -856,6 +859,12 @@ procedure TWebModule1.WebModuleCreate(Sender: TObject);
 var
   ini: TIniFile;
 begin
+  if FDTable1.Exists = false then
+    FDTable1.CreateTable(false);
+  if FDTable2.Exists = false then
+    FDTable2.CreateTable(false);
+  FDTable1.Active := true;
+  FDTable2.Active := true;
   ini := TIniFile.Create('data/setting.ini');
   try
     count := ini.ReadInteger('data', 'count', 10);
