@@ -1,6 +1,7 @@
 object WebModule1: TWebModule1
   OldCreateOrder = False
   OnCreate = WebModuleCreate
+  OnDestroy = WebModuleDestroy
   Actions = <
     item
       Name = 'WebActionItem1'
@@ -55,10 +56,12 @@ object WebModule1: TWebModule1
       'User_Name=postgres'
       'Password=kainushi'
       'DriverID=PG')
+    Connected = True
     Left = 328
     Top = 24
   end
   object FDTable1: TFDTable
+    Active = True
     Filter = 'dbname not like '#39#26410#38283#23553'%'#39
     IndexFieldNames = 'dbnumber'
     Connection = FDConnection1
@@ -80,6 +83,7 @@ object WebModule1: TWebModule1
     end
   end
   object FDTable2: TFDTable
+    Active = True
     Filtered = True
     IndexFieldNames = 'dbnumber;cmnumber'
     MasterSource = DataSource1

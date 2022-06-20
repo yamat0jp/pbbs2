@@ -73,6 +73,7 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer2HTMLTag(Sender: TObject; Tag: TTag;
       const TagString: string; TagParams: TStrings; var ReplaceText: string);
+    procedure WebModuleDestroy(Sender: TObject);
   private
     { private êÈåæ }
     count: Integer;
@@ -874,6 +875,20 @@ begin
     ini.Free;
   end;
   DataSetTableProducer1.MaxRows := count;
+end;
+
+procedure TWebModule1.WebModuleDestroy(Sender: TObject);
+var
+  ini: TIniFile;
+begin
+  ini := TIniFile.Create('data/setting.ini');
+  try
+    ini.WriteInteger('data', 'count', count);
+    ini.WriteInteger('data', 'pagecount', pagecount);
+    ini.WriteBool('data', 'mentenance', mente);
+  finally
+    ini.Free;
+  end;
 end;
 
 end.
