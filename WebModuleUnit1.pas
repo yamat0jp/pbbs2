@@ -69,8 +69,6 @@ type
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure WebModule1WebActionItem7Action(Sender: TObject;
       Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
-    procedure WebModule1WebActionItem8Action(Sender: TObject;
-      Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
     procedure DataSetPageProducer2HTMLTag(Sender: TObject; Tag: TTag;
       const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModuleDestroy(Sender: TObject);
@@ -79,7 +77,9 @@ type
     count: Integer;
     pagecount: Integer;
     idcount: Integer;
+    link: integer;
     mente: Boolean;
+    isget: Boolean;
     procedure makeComment(list: TStringList);
     function makeFooter(script: string): string;
     function ActiveRecordisNew: Boolean;
@@ -183,12 +183,12 @@ procedure TWebModule1.DataSetPageProducer3HTMLTag(Sender: TObject; Tag: TTag;
 begin
   if TagString = 'article' then
   begin
-    if DataSetPageProducer3.Tag = 0 then
+    if isget then
       ReplaceText := DataSetPageProducer2.Content;
   end
   else if TagString = 'message' then
   begin
-    if DataSetPageProducer3.Tag = 0 then
+    if isget then
       ReplaceText :=
         '<textarea name=com></textarea><p style=text-align:center><input name=admit type=submit value="‘—M">'
     else
@@ -495,7 +495,7 @@ begin
   else if TagString = 'footer' then
     ReplaceText := makeFooter('admin')
   else if (TagString = 'section') and
-    (FDTable2.Locate('cmnumber', PageProducer2.Tag) = true) then
+    (FDTable2.Locate('cmnumber', link) = true) then
     ReplaceText := DataSetPageProducer2.Content;
 end;
 
@@ -664,10 +664,10 @@ begin
     Exit;
   end;
   if Request.MethodType = mtGet then
-    DataSetPageProducer3.Tag := 0
+    isget:=true
   else if Request.MethodType = mtPost then
   begin
-    DataSetPageProducer3.Tag := 1;
+    isget:=false;
     if FileExists('data/voice.txt') = true then
       stream := TFileStream.Create('data/voice.txt', fmOpenWrite)
     else
@@ -755,10 +755,7 @@ begin
       FDTable2.Filtered := false;
     end;
   end;
-  i := StrToIntDef(Request.QueryFields.Values['page'], 0);
-  FDTable2.First;
-  FDTable2.MoveBy((i - 1) * 2 * count);
-  PageProducer2.Tag := StrToIntDef(Request.QueryFields.Values['link'], 0);
+  link := StrToIntDef(Request.QueryFields.Values['link'], 0);
   Response.ContentType := 'text/html;charset=utf-8;';
   Response.Content := PageProducer2.Content;
 end;
@@ -778,10 +775,10 @@ var
 begin
   if Request.MethodType = mtPost then
   begin
-    if FileExists('templates/voice.txt') = true then
-      stream := TFileStream.Create('templates/voice.txt', fmOpenWrite)
+    if FileExists('data/voice.txt') = true then
+      stream := TFileStream.Create('data/voice.txt', fmOpenWrite)
     else
-      stream := TFileStream.Create('templates/voice.txt', fmCreate);
+      stream := TFileStream.Create('data/voice.txt', fmCreate);
     stream.Position := stream.Size;
     list := TStringList.Create;
     try
@@ -820,33 +817,6 @@ begin
     Response.SendRedirect('/admin?db=' + Encode.Encode(dbname));
   finally
     Encode.Free;
-  end;
-end;
-
-procedure TWebModule1.WebModule1WebActionItem8Action(Sender: TObject;
-  Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
-const
-  str = '–¢ŠJ•• ŒfŽ¦”Â ';
-var
-  i, j, k: Integer;
-  s: string;
-begin
-  FDTable1.Filtered := false;
-  try
-    FDTable1.Last;
-    i := FDTable1.FieldByName('dbnumber').AsInteger + 1;
-    for k := 1 to 10 do
-    begin
-      j := 0;
-      repeat
-        inc(j);
-        s := str + j.toString;
-      until FDTable1.Locate('dbname', s) = false;
-      FDTable1.AppendRecord([i, s]);
-      inc(i);
-    end;
-  finally
-    FDTable1.Filtered := true;
   end;
 end;
 

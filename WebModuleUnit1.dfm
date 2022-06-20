@@ -39,12 +39,6 @@ object WebModule1: TWebModule1
       Name = 'WebActionItem7'
       PathInfo = '/rename'
       OnAction = WebModule1WebActionItem7Action
-    end
-    item
-      MethodType = mtPost
-      Name = 'WebActionItem8'
-      PathInfo = '/createnew'
-      OnAction = WebModule1WebActionItem8Action
     end>
   BeforeDispatch = WebModuleBeforeDispatch
   Height = 321
@@ -62,7 +56,6 @@ object WebModule1: TWebModule1
   end
   object FDTable1: TFDTable
     Active = True
-    Filter = 'dbname not like '#39#26410#38283#23553'%'#39
     IndexFieldNames = 'dbnumber'
     Connection = FDConnection1
     UpdateOptions.UpdateTableName = 'nametable'
