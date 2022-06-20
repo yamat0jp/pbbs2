@@ -78,6 +78,7 @@ type
     { private êÈåæ }
     count: Integer;
     pagecount: Integer;
+    idcount: Integer;
     mente: Boolean;
     procedure makeComment(list: TStringList);
     function makeFooter(script: string): string;
@@ -86,6 +87,7 @@ type
     function findText(word: string): string;
     function onlyCheck(words: TStringList): Boolean;
     function replaceRawData(Data: string): string;
+    procedure islastproc;
   public
     { public êÈåæ }
   end;
@@ -108,12 +110,32 @@ begin
   result := date < 1;
 end;
 
+procedure TWebModule1.islastproc;
+var
+  i: Integer;
+begin
+  i := StrToIntDef(Request.QueryFields.Values['page'], 0);
+  if (i = 0) or ((i - 1) * count > FDTable2.RecordCount) then
+  begin
+    idcount := 0;
+    FDTable2.Last;
+    FDTable2.MoveBy(-count + 1);
+  end
+  else
+  begin
+    idcount := i;
+    FDTable2.First;
+    FDTable2.MoveBy((idcount - 1) * count);
+  end;
+end;
+
 procedure TWebModule1.DataSetPageProducer1HTMLTag(Sender: TObject; Tag: TTag;
   const TagString: string; TagParams: TStrings; var ReplaceText: string);
 var
-  i, cnt: Integer;
+  cnt: Integer;
   s: string;
 begin
+  islastproc;
   if TagString = 'form' then
   begin
     if count * pagecount > FDTable2.RecordCount then
@@ -123,17 +145,6 @@ begin
   end
   else if TagString = 'main' then
   begin
-    i := StrToIntDef(Request.QueryFields.Values['page'], 0);
-    if (i = 0) or (i * count > FDTable2.RecordCount) then
-    begin
-      FDTable2.Last;
-      FDTable2.MoveBy(-count + 1);
-    end
-    else
-    begin
-      FDTable2.First;
-      FDTable2.MoveBy((i - 1) * count);
-    end;
     cnt := count;
     s := FDTable1.FieldByName('dbname').AsString;
     while (FDTable2.Eof = false) and (cnt > 0) do
@@ -204,7 +215,7 @@ begin
           s := Request.QueryFields.Values['page'];
           if s <> '' then
             s := '&page=' + s;
-          CellData := Format('<a href=/admin?db=%s%s&link=%d>go</a>',
+          CellData := Format('<a href="/admin?db=%s%s&link=%d">go</a>',
             [Request.QueryFields.Values['db'], s,
             FDTable2.FieldByName('cmnumber').AsInteger]);
         end;
@@ -340,27 +351,20 @@ end;
 function TWebModule1.makeFooter(script: string): string;
 var
   list: TStringList;
-  i, j: Integer;
-  s, t, p: string;
+  i: Integer;
+  s, t: string;
 begin
-  if script = 'bbs' then
-    p := 'Ç≥Ç¢Ç≤'
+  if idcount = 0 then
+    t := 'active'
   else
-    p := 'ÇÕÇ∂Çﬂ';
-  if Request.QueryFields.Values['page'] = '' then
-  begin
-    t := 'active';
-    j := 0;
-  end
-  else
-    j := Request.QueryFields.Values['page'].ToInteger;
+    t := '';
   list := TStringList.Create;
   try
     list.Add('<nav aria-label="Page navigation"><ul class="pagination pagination-sm justify-content-center">');
     s := Request.QueryFields.Values['db'];
     for i := 1 to pagecount do
     begin
-      if i = j then
+      if i = idcount then
         list.Add('<li class="page-item active">')
       else
         list.Add('<li class="page-item">');
@@ -369,8 +373,8 @@ begin
         [script, s, i, i]));
     end;
     list.Add(Format
-      ('<li class="page-item %s"><a class="page-link" href="/%s?db=%s">%s</a></li></ul></nav>',
-      [t, script, s, p]));
+      ('<li class="page-item %s"><a class="page-link" href="/%s?db=%s">Ç≥Ç¢Ç≤</a></li></ul></nav>',
+      [t, script, s]));
     result := list.Text;
   finally
     list.Free;
@@ -483,6 +487,7 @@ end;
 procedure TWebModule1.PageProducer2HTMLTag(Sender: TObject; Tag: TTag;
   const TagString: string; TagParams: TStrings; var ReplaceText: string);
 begin
+  islastproc;
   if TagString = 'table' then
     ReplaceText := DataSetTableProducer1.Content
   else if TagString = 'dbname' then

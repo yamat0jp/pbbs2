@@ -253,17 +253,17 @@ object WebModule1: TWebModule1
         Title.Caption = 'CHECK'
       end
       item
-        FieldName = 'CMNUMBER'
+        FieldName = 'cmnumber'
         Title.Custom = 'width=5%'
         Title.BgColor = 'Aqua'
         Title.Caption = 'NUMBER'
       end
       item
-        FieldName = 'TITLE'
+        FieldName = 'title'
         Title.BgColor = 'Aqua'
       end
       item
-        FieldName = 'NAME'
+        FieldName = 'name'
         Title.BgColor = 'Aqua'
       end
       item
@@ -272,6 +272,7 @@ object WebModule1: TWebModule1
         Title.BgColor = 'Aqua'
         Title.Caption = 'LINK'
       end>
+    MaxRows = 0
     DataSet = FDTable2
     TableAttributes.BgColor = 'White'
     OnFormatCell = DataSetTableProducer1FormatCell
@@ -288,16 +289,17 @@ object WebModule1: TWebModule1
       '  <link rel=stylesheet href=css/main.css>'
       
         '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/' +
-        'bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFG' +
-        'wb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" cross' +
-        'origin="anonymous">'
+        'bootstrap/4.2.1/css/bootstrap.min.css"'
+      
+        ' integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4' +
+        'iYMj70gZWKYbI706tWS" crossorigin="anonymous">'
       '<form method=post>'
       
         #21517#31216#65306'<input type=edit name=text value="<#dbname>"><input type=subm' +
-        'it formaction=/rename?db=<#dbname> value="'#22793#26356'">'
+        'it formaction="/rename?db=<#dbname>" value="'#22793#26356'">'
       
-        '<p style=align:center><input type=submit formaction=/top?db=<#db' +
-        'name> value="'#20840#21066#38500'">'
+        '<p style=align:center><input type=submit formaction="/top?db=<#d' +
+        'bname>" value="'#20840#21066#38500'">'
       '<#table>'
       
         '<input type=submit formaction="/admin?db=<#dbname>" value="'#21066#38500'"><' +
