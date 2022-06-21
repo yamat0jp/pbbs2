@@ -72,12 +72,14 @@ type
     procedure DataSetPageProducer2HTMLTag(Sender: TObject; Tag: TTag;
       const TagString: string; TagParams: TStrings; var ReplaceText: string);
     procedure WebModuleDestroy(Sender: TObject);
+    procedure PageProducer5HTMLTag(Sender: TObject; Tag: TTag;
+      const TagString: string; TagParams: TStrings; var ReplaceText: string);
   private
     { private êÈåæ }
     count: Integer;
     pagecount: Integer;
     idcount: Integer;
-    link: integer;
+    link: Integer;
     mente: Boolean;
     isget: Boolean;
     procedure makeComment(list: TStringList);
@@ -494,8 +496,8 @@ begin
     ReplaceText := Request.QueryFields.Values['db']
   else if TagString = 'footer' then
     ReplaceText := makeFooter('admin')
-  else if (TagString = 'section') and
-    (FDTable2.Locate('cmnumber', link) = true) then
+  else if (TagString = 'section') and (FDTable2.Locate('cmnumber', link) = true)
+  then
     ReplaceText := DataSetPageProducer2.Content;
 end;
 
@@ -566,6 +568,13 @@ begin
       list.Free;
     end;
   end;
+end;
+
+procedure TWebModule1.PageProducer5HTMLTag(Sender: TObject; Tag: TTag;
+  const TagString: string; TagParams: TStrings; var ReplaceText: string);
+begin
+  if isget then
+    ReplaceText := '<p><input type=submit value="ëóêM"></p>';
 end;
 
 function TWebModule1.rapperSearch: string;
@@ -664,10 +673,10 @@ begin
     Exit;
   end;
   if Request.MethodType = mtGet then
-    isget:=true
+    isget := true
   else if Request.MethodType = mtPost then
   begin
-    isget:=false;
+    isget := false;
     if FileExists('data/voice.txt') = true then
       stream := TFileStream.Create('data/voice.txt', fmOpenWrite)
     else
@@ -773,6 +782,7 @@ var
   stream: TFileStream;
   list: TStringList;
 begin
+  isget := true;
   if Request.MethodType = mtPost then
   begin
     if FileExists('data/voice.txt') = true then
@@ -793,6 +803,7 @@ begin
       stream.Free;
       list.Free;
     end;
+    isget := false;
   end;
   Response.ContentType := 'text/html;charset=utf-8';
   Response.Content := PageProducer5.Content;

@@ -329,6 +329,7 @@ object WebModule1: TWebModule1
   end
   object PageProducer5: TPageProducer
     HTMLFile = 'templates\help.htm'
+    OnHTMLTag = PageProducer5HTMLTag
     Left = 248
     Top = 264
   end
